@@ -5,6 +5,9 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace HelloCivil3D.Models
 {
+    /// <summary>
+    /// Dados de entrada preenchidos na UI e consumidos pelo serviço de criação.
+    /// </summary>
     public sealed class CriarAlinhamentosRequest
     {
         public string Prefixo { get; set; } = "D";
@@ -18,6 +21,9 @@ namespace HelloCivil3D.Models
         public bool ApagarPolilinhasOriginais { get; set; } = false;
     }
 
+    /// <summary>
+    /// Consolida os resultados da execução para exibição no resumo final.
+    /// </summary>
     public sealed class CriarAlinhamentosResultado
     {
         public int TotalPolilinhas { get; set; }
@@ -27,6 +33,9 @@ namespace HelloCivil3D.Models
         public List<string> MensagensErro { get; } = new();
     }
 
+    /// <summary>
+    /// Representa uma zona derivada de Feature Line para classificação espacial.
+    /// </summary>
     public sealed class ZonaSiteInfo
     {
         public ObjectId FeatureLineId { get; set; } = ObjectId.Null;

@@ -13,8 +13,16 @@ using System.Text.RegularExpressions;
 
 namespace HelloCivil3D.Services
 {
+    /// <summary>
+    /// Concentra as regras de criação de alignments a partir de polilinhas,
+    /// incluindo validações, associação por zona e convenção de nomes.
+    /// </summary>
     public static class AlignmentCreationService
     {
+        /// <summary>
+        /// Executa o processamento completo dentro de uma única transação,
+        /// garantindo consistência entre leitura e criação das entidades.
+        /// </summary>
         public static CriarAlinhamentosResultado Executar(
             CivilDocument civilDoc,
             Database db,
@@ -267,7 +275,8 @@ namespace HelloCivil3D.Services
 
             if (candidatas.Count > 1)
             {
-                // fallback: pega a zona cujo centro do extents está mais próximo
+                // Se mais de uma zona contém o centro, usamos distância ao centro
+                // para manter escolha determinística e reproduzível.
                 return candidatas
                     .OrderBy(z => DistanceSquared(GetExtentsCenter(z.Extents), centroPolyline))
                     .First();

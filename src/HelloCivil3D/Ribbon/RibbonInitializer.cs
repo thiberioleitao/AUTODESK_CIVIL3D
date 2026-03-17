@@ -8,10 +8,15 @@ using System.Runtime.Versioning;
 namespace HelloCivil3D.Ribbon
 {
     [SupportedOSPlatform("windows")]
+    /// <summary>
+    /// Centraliza a criação da aba personalizada no Ribbon do Civil 3D.
+    /// Mantém lógica idempotente para evitar abas duplicadas em recargas.
+    /// </summary>
     public static class RibbonInitializer
     {
         private const string TabId = "PL_ENGENHARIA_TAB";
         private const string PanelSourceId = "PL_DRENAGEM_PANEL";
+        private static bool _aguardandoRibbon;
 
         public static void InitializeRibbon()
         {
@@ -19,6 +24,7 @@ namespace HelloCivil3D.Ribbon
             {
                 var doc = Application.DocumentManager.MdiActiveDocument;
                 doc?.Editor.WriteMessage("\n[HelloCivil3D] InitializeRibbon chamado.");
+                doc?.Editor.WriteMessage($"\n[HelloCivil3D] Ribbon null? {ComponentManager.Ribbon == null}");
 
                 if (ComponentManager.Ribbon != null)
                 {
@@ -27,8 +33,17 @@ namespace HelloCivil3D.Ribbon
                     return;
                 }
 
-                doc?.Editor.WriteMessage("\n[HelloCivil3D] Ribbon ainda não disponível. Aguardando ItemInitialized.");
+                // O Ribbon pode ainda não existir durante o NETLOAD.
+                // Nesse caso aguardamos o evento de inicialização da UI.
+                if (_aguardandoRibbon)
+                {
+                    doc?.Editor.WriteMessage("\n[HelloCivil3D] Já aguardando ItemInitialized. Nenhuma nova inscrição realizada.");
+                    return;
+                }
+
+                doc?.Editor.WriteMessage("\n[HelloCivil3D] Ribbon ainda não disponível. Inscrevendo ItemInitialized.");
                 ComponentManager.ItemInitialized += OnItemInitialized;
+                _aguardandoRibbon = true;
             }
             catch (Exception ex)
             {
@@ -42,13 +57,18 @@ namespace HelloCivil3D.Ribbon
             try
             {
                 var doc = Application.DocumentManager.MdiActiveDocument;
-                doc?.Editor.WriteMessage("\n[HelloCivil3D] OnItemInitialized disparado.");
+                doc?.Editor.WriteMessage($"\n[HelloCivil3D] OnItemInitialized disparado. Item: {e.Item?.Id ?? "(sem id)"}");
 
                 if (ComponentManager.Ribbon == null)
+                {
+                    doc?.Editor.WriteMessage("\n[HelloCivil3D] OnItemInitialized: Ribbon ainda nula.");
                     return;
+                }
 
                 CreateRibbon(ComponentManager.Ribbon);
                 ComponentManager.ItemInitialized -= OnItemInitialized;
+                _aguardandoRibbon = false;
+                doc?.Editor.WriteMessage("\n[HelloCivil3D] ItemInitialized removido.");
             }
             catch (Exception ex)
             {
@@ -63,6 +83,7 @@ namespace HelloCivil3D.Ribbon
             {
                 var doc = Application.DocumentManager.MdiActiveDocument;
                 doc?.Editor.WriteMessage("\n[HelloCivil3D] CreateRibbon chamado.");
+                doc?.Editor.WriteMessage($"\n[HelloCivil3D] Total de abas atuais: {ribbon.Tabs.Count}");
 
                 var existingTab = ribbon.Tabs.FirstOrDefault(t => t.Id == TabId);
                 if (existingTab != null)
@@ -104,6 +125,7 @@ namespace HelloCivil3D.Ribbon
                 ribbon.ActiveTab = tab;
 
                 doc?.Editor.WriteMessage("\n[HelloCivil3D] Aba e botão criados com sucesso.");
+                doc?.Editor.WriteMessage($"\n[HelloCivil3D] Aba ativa: {ribbon.ActiveTab?.Id ?? "(nenhuma)"}");
             }
             catch (Exception ex)
             {
@@ -114,8 +136,13 @@ namespace HelloCivil3D.Ribbon
     }
 
     [SupportedOSPlatform("windows")]
+    /// <summary>
+    /// Encaminha o clique do botão para um comando de texto do AutoCAD.
+    /// </summary>
     public class RibbonCommandHandler : System.Windows.Input.ICommand
     {
+        private const string CommandName = "PL_CRIAR_ALINHAMENTOS ";
+
         public event EventHandler? CanExecuteChanged;
 
         public bool CanExecute(object? parameter) => true;
@@ -128,7 +155,13 @@ namespace HelloCivil3D.Ribbon
             if (doc == null)
                 return;
 
-            doc.SendStringToExecute(parameter?.ToString() ?? "", true, false, true);
+            string commandText = CommandName;
+
+            string parameterType = parameter?.GetType().FullName ?? "(null)";
+            doc?.Editor.WriteMessage($"\n[HelloCivil3D] Tipo de parâmetro no clique: {parameterType}");
+
+            doc?.Editor.WriteMessage($"\n[HelloCivil3D] Enviando comando: {commandText.Trim()}");
+            doc.SendStringToExecute(commandText, true, false, true);
         }
     }
 }

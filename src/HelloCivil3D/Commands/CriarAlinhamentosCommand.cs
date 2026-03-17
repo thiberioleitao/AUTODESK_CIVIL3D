@@ -7,12 +7,17 @@ using Autodesk.Civil.ApplicationServices;
 using Autodesk.Civil.DatabaseServices;
 using HelloCivil3D.Models;
 using HelloCivil3D.Services;
+using HelloCivil3D.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HelloCivil3D.Commands
 {
+    /// <summary>
+    /// Comando principal que orquestra: coleta de parâmetros, execução do serviço
+    /// e apresentação do resumo ao usuário na linha de comando.
+    /// </summary>
     public class CriarAlinhamentosCommand
     {
         [CommandMethod("PL_CRIAR_ALINHAMENTOS")]
@@ -78,94 +83,31 @@ namespace HelloCivil3D.Commands
             List<string> alignmentStyles = GetAlignmentStyleNames(civilDoc);
             List<string> labelSets = GetAlignmentLabelSetNames(civilDoc);
 
-            string? sourceLayer = PromptForString(
-                ed,
-                "\nLayer de origem das polilinhas",
-                layers.FirstOrDefault());
+            var tela = new CriarAlinhamentosWindow(layers, sites, alignmentStyles, labelSets);
+            bool? dialogResult = tela.ShowDialog();
 
-            if (string.IsNullOrWhiteSpace(sourceLayer))
+            if (dialogResult != true)
                 return null;
 
-            string? destinationLayer = PromptForString(
-                ed,
-                "\nLayer de destino dos alignments <Enter = mesma da origem>",
-                sourceLayer);
-
-            if (destinationLayer == null)
-                return null;
-
-            string? siteName = PromptForString(
-                ed,
-                "\nNome do Site",
-                sites.FirstOrDefault());
-
-            if (string.IsNullOrWhiteSpace(siteName))
-                return null;
-
-            string? prefixo = PromptForString(ed, "\nPrefixo dos alinhamentos", "D");
-            if (string.IsNullOrWhiteSpace(prefixo))
-                return null;
-
-            int? numeroInicial = PromptForInt(ed, "\nNúmero inicial", 1);
-            if (numeroInicial == null)
-                return null;
-
-            int? incremento = PromptForInt(ed, "\nIncremento", 1);
-            if (incremento == null)
-                return null;
-
-            string? styleName = PromptForString(
-                ed,
-                "\nEstilo de alignment",
-                alignmentStyles.FirstOrDefault());
-
-            if (string.IsNullOrWhiteSpace(styleName))
-                return null;
-
-            string? labelSetName = PromptForString(
-                ed,
-                "\nLabel set de alignment",
-                labelSets.FirstOrDefault());
-
-            if (string.IsNullOrWhiteSpace(labelSetName))
-                return null;
-
-            bool? apagarOriginais = PromptForYesNo(
-                ed,
-                "\nApagar polilinhas originais após criar alignment?",
-                false);
-
-            if (apagarOriginais == null)
-                return null;
-
-            // Mostra listas úteis ao usuário
-            ed.WriteMessage("\n");
-            ed.WriteMessage("\nLayers disponíveis:");
-            foreach (string l in layers.Take(20))
-                ed.WriteMessage($"\n - {l}");
-
-            ed.WriteMessage("\nSites disponíveis:");
-            foreach (string s in sites)
-                ed.WriteMessage($"\n - {s}");
-
+            // A UI atualmente trabalha com uma única layer de origem/destino.
+            // Mantemos o mesmo valor para preservar comportamento previsível.
             return new CriarAlinhamentosRequest
             {
-                Prefixo = prefixo.Trim(),
-                SourceLayerName = sourceLayer.Trim(),
-                DestinationLayerName = string.IsNullOrWhiteSpace(destinationLayer)
-                    ? sourceLayer.Trim()
-                    : destinationLayer.Trim(),
-                SiteName = siteName.Trim(),
-                AlignmentStyleName = styleName.Trim(),
-                AlignmentLabelSetName = labelSetName.Trim(),
-                NumeroInicial = numeroInicial.Value,
-                Incremento = incremento.Value,
-                ApagarPolilinhasOriginais = apagarOriginais.Value
+                Prefixo = tela.Prefixo,
+                SourceLayerName = tela.SourceLayerName,
+                DestinationLayerName = tela.SourceLayerName,
+                SiteName = tela.SiteName,
+                AlignmentStyleName = tela.AlignmentStyleName,
+                AlignmentLabelSetName = tela.AlignmentLabelSetName,
+                NumeroInicial = tela.NumeroInicial,
+                Incremento = tela.Incremento,
+                ApagarPolilinhasOriginais = tela.ApagarPolilinhasOriginais
             };
         }
 
         private static string? PromptForString(Editor ed, string message, string? defaultValue)
         {
+            // Mantido para eventual fallback em modo somente linha de comando.
             var opts = new PromptStringOptions(
                 $"{message}{(string.IsNullOrWhiteSpace(defaultValue) ? "" : $" <{defaultValue}>")}: ")
             {
@@ -184,6 +126,7 @@ namespace HelloCivil3D.Commands
 
         private static int? PromptForInt(Editor ed, string message, int defaultValue)
         {
+            // Mantido para eventual fallback em modo somente linha de comando.
             var opts = new PromptIntegerOptions($"{message} <{defaultValue}>: ")
             {
                 DefaultValue = defaultValue,
@@ -205,6 +148,7 @@ namespace HelloCivil3D.Commands
 
         private static bool? PromptForYesNo(Editor ed, string message, bool defaultValue)
         {
+            // Mantido para eventual fallback em modo somente linha de comando.
             const string Sim = "Sim";
             const string Nao = "Nao";
             string defaultKeyword = defaultValue ? "Sim" : "Nao";
