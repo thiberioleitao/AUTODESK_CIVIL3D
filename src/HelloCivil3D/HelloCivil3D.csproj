@@ -9,6 +9,7 @@
     <AssemblyName>HelloCivil3D</AssemblyName>
     <Platforms>x64</Platforms>
 	<PlatformTarget>x64</PlatformTarget>
+	<UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,16 +18,32 @@
       Em ambientes diferentes, o caminho pode variar.
     -->
     <Reference Include="AcCoreMgd">
-      <HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AcCoreMgd.dll</HintPath>
-      <Private>false</Private>
+        <HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AcCoreMgd.dll</HintPath>
+        <Private>false</Private>
     </Reference>
     <Reference Include="AcDbMgd">
-      <HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AcDbMgd.dll</HintPath>
-      <Private>false</Private>
+        <HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AcDbMgd.dll</HintPath>
+        <Private>false</Private>
     </Reference>
     <Reference Include="AcMgd">
-      <HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AcMgd.dll</HintPath>
-      <Private>false</Private>
+        <HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AcMgd.dll</HintPath>
+        <Private>false</Private>
     </Reference>
+	<Reference Include="AcWindows">
+		<HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AcWindows.dll</HintPath>
+		<Private>false</Private>
+	</Reference>
+	<Reference Include="AdWindows">
+		<HintPath>C:\Program Files\Autodesk\AutoCAD 2026\AdWindows.dll</HintPath>
+		<Private>false</Private>
+	</Reference>
+	<Reference Include="AeccDbMgd">
+		<HintPath>C:\Program Files\Autodesk\AutoCAD 2026\C3D\AeccDbMgd.dll</HintPath>
+		<Private>false</Private>
+	</Reference>
+	<Reference Include="AecBaseMgd">
+		<HintPath>C:\Program Files\Autodesk\AutoCAD 2026\ACA\AecBaseMgd.dll</HintPath>
+		<Private>false</Private>
+	</Reference>
   </ItemGroup>
 </Project>
