@@ -1,0 +1,326 @@
+﻿// CriarAlinhamentosCommand.cs
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.Civil.ApplicationServices;
+using Autodesk.Civil.DatabaseServices;
+using HelloCivil3D.Models;
+using HelloCivil3D.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Policy;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace HelloCivil3D.Commands
+{
+    public class CriarAlinhamentosCommand
+    {
+        [CommandMethod("PL_CRIAR_ALINHAMENTOS")]
+        public void Executar()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            if (doc == null)
+                return;
+
+            var db = doc.Database;
+            var ed = doc.Editor;
+            CivilDocument civilDoc = CivilApplication.ActiveDocument;
+
+            try
+            {
+                ed.WriteMessage("\n[HelloCivil3D] Comando iniciado.");
+
+                var request = ColetarParametros(civilDoc, db, ed);
+                if (request == null)
+                {
+                    ed.WriteMessage("\n[HelloCivil3D] Comando cancelado.");
+                    return;
+                }
+
+                CriarAlinhamentosResultado resultado =
+                    AlignmentCreationService.Executar(civilDoc, db, ed, request);
+
+                ed.WriteMessage("\n");
+                ed.WriteMessage("\n===== RESUMO =====");
+                ed.WriteMessage($"\nPolilinhas encontradas: {resultado.TotalPolilinhas}");
+                ed.WriteMessage($"\nAlignments criados: {resultado.TotalCriados}");
+                ed.WriteMessage($"\nSem zona: {resultado.TotalSemZona}");
+
+                if (resultado.NomesCriados.Count > 0)
+                {
+                    ed.WriteMessage("\nNomes criados:");
+                    foreach (string nome in resultado.NomesCriados)
+                        ed.WriteMessage($"\n - {nome}");
+                }
+
+                if (resultado.MensagensErro.Count > 0)
+                {
+                    ed.WriteMessage("\nMensagens/erros:");
+                    foreach (string msg in resultado.MensagensErro)
+                        ed.WriteMessage($"\n - {msg}");
+                }
+
+                ed.WriteMessage("\n===== FIM =====");
+            }
+            catch (System.Exception ex)
+            {
+                ed.WriteMessage($"\n[HelloCivil3D] Erro no comando: {ex.Message}");
+            }
+        }
+
+        private static CriarAlinhamentosRequest? ColetarParametros(
+            CivilDocument civilDoc,
+            Database db,
+            Editor ed)
+        {
+            List<string> layers = GetAllLayerNames(db);
+            List<string> sites = GetAllSiteNames(civilDoc, db);
+            List<string> alignmentStyles = GetAlignmentStyleNames(civilDoc);
+            List<string> labelSets = GetAlignmentLabelSetNames(civilDoc);
+
+            string? sourceLayer = PromptForString(
+                ed,
+                "\nLayer de origem das polilinhas",
+                layers.FirstOrDefault());
+
+            if (string.IsNullOrWhiteSpace(sourceLayer))
+                return null;
+
+            string? destinationLayer = PromptForString(
+                ed,
+                "\nLayer de destino dos alignments <Enter = mesma da origem>",
+                sourceLayer);
+
+            if (destinationLayer == null)
+                return null;
+
+            string? siteName = PromptForString(
+                ed,
+                "\nNome do Site",
+                sites.FirstOrDefault());
+
+            if (string.IsNullOrWhiteSpace(siteName))
+                return null;
+
+            string? prefixo = PromptForString(ed, "\nPrefixo dos alinhamentos", "D");
+            if (string.IsNullOrWhiteSpace(prefixo))
+                return null;
+
+            int? numeroInicial = PromptForInt(ed, "\nNúmero inicial", 1);
+            if (numeroInicial == null)
+                return null;
+
+            int? incremento = PromptForInt(ed, "\nIncremento", 1);
+            if (incremento == null)
+                return null;
+
+            string? styleName = PromptForString(
+                ed,
+                "\nEstilo de alignment",
+                alignmentStyles.FirstOrDefault());
+
+            if (string.IsNullOrWhiteSpace(styleName))
+                return null;
+
+            string? labelSetName = PromptForString(
+                ed,
+                "\nLabel set de alignment",
+                labelSets.FirstOrDefault());
+
+            if (string.IsNullOrWhiteSpace(labelSetName))
+                return null;
+
+            bool? apagarOriginais = PromptForYesNo(
+                ed,
+                "\nApagar polilinhas originais após criar alignment?",
+                false);
+
+            if (apagarOriginais == null)
+                return null;
+
+            // Mostra listas úteis ao usuário
+            ed.WriteMessage("\n");
+            ed.WriteMessage("\nLayers disponíveis:");
+            foreach (string l in layers.Take(20))
+                ed.WriteMessage($"\n - {l}");
+
+            ed.WriteMessage("\nSites disponíveis:");
+            foreach (string s in sites)
+                ed.WriteMessage($"\n - {s}");
+
+            return new CriarAlinhamentosRequest
+            {
+                Prefixo = prefixo.Trim(),
+                SourceLayerName = sourceLayer.Trim(),
+                DestinationLayerName = string.IsNullOrWhiteSpace(destinationLayer)
+                    ? sourceLayer.Trim()
+                    : destinationLayer.Trim(),
+                SiteName = siteName.Trim(),
+                AlignmentStyleName = styleName.Trim(),
+                AlignmentLabelSetName = labelSetName.Trim(),
+                NumeroInicial = numeroInicial.Value,
+                Incremento = incremento.Value,
+                ApagarPolilinhasOriginais = apagarOriginais.Value
+            };
+        }
+
+        private static string? PromptForString(Editor ed, string message, string? defaultValue)
+        {
+            var opts = new PromptStringOptions(
+                $"{message}{(string.IsNullOrWhiteSpace(defaultValue) ? "" : $" <{defaultValue}>")}: ")
+            {
+                AllowSpaces = true
+            };
+
+            PromptResult res = ed.GetString(opts);
+            if (res.Status == PromptStatus.Cancel)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(res.StringResult))
+                return defaultValue ?? string.Empty;
+
+            return res.StringResult;
+        }
+
+        private static int? PromptForInt(Editor ed, string message, int defaultValue)
+        {
+            var opts = new PromptIntegerOptions($"{message} <{defaultValue}>: ")
+            {
+                DefaultValue = defaultValue,
+                UseDefaultValue = true,
+                AllowNegative = false,
+                AllowZero = false,
+                AllowNone = true
+            };
+
+            PromptIntegerResult res = ed.GetInteger(opts);
+            if (res.Status == PromptStatus.Cancel)
+                return null;
+
+            if (res.Status == PromptStatus.None)
+                return defaultValue;
+
+            return res.Value;
+        }
+
+        private static bool? PromptForYesNo(Editor ed, string message, bool defaultValue)
+        {
+            string defaultKeyword = defaultValue ? "Sim" : "Nao";
+            var opts = new PromptKeywordOptions(
+                $"{message} [{nameof(Sim)}/{nameof(Nao)}] <{defaultKeyword}>: ",
+                "Sim Nao")
+            {
+                AllowNone = true
+            };
+
+            PromptResult res = ed.GetKeywords(opts);
+            if (res.Status == PromptStatus.Cancel)
+                return null;
+
+            if (res.Status == PromptStatus.None)
+                return defaultValue;
+
+            return string.Equals(res.StringResult, "Sim", StringComparison.OrdinalIgnoreCase);
+
+            static string Sim => "Sim";
+            static string Nao => "Nao";
+        }
+
+        private static List<string> GetAllLayerNames(Database db)
+        {
+            var names = new List<string>();
+
+            using Transaction tr = db.TransactionManager.StartTransaction();
+            var lt = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+
+            foreach (ObjectId id in lt)
+            {
+                if (tr.GetObject(id, OpenMode.ForRead) is LayerTableRecord ltr)
+                    names.Add(ltr.Name);
+            }
+
+            tr.Commit();
+            return names.OrderBy(x => x).ToList();
+        }
+
+        private static List<string> GetAllSiteNames(CivilDocument civilDoc, Database db)
+        {
+            var names = new List<string>();
+
+            using Transaction tr = db.TransactionManager.StartTransaction();
+            foreach (ObjectId siteId in civilDoc.GetSiteIds())
+            {
+                if (tr.GetObject(siteId, OpenMode.ForRead) is Site site)
+                    names.Add(site.Name);
+            }
+
+            tr.Commit();
+            return names.OrderBy(x => x).ToList();
+        }
+
+        private static List<string> GetAlignmentStyleNames(CivilDocument civilDoc)
+        {
+            var names = new List<string>();
+
+            foreach (ObjectId id in civilDoc.Styles.AlignmentStyles)
+            {
+                try
+                {
+                    names.Add(civilDoc.Styles.AlignmentStyles[id]);
+                }
+                catch
+                {
+                    // fallback ignorado
+                }
+            }
+
+            // Fallback simples caso a enumeração acima não devolva nomes
+            if (names.Count == 0)
+            {
+                try
+                {
+                    for (int i = 0; i < civilDoc.Styles.AlignmentStyles.Count; i++)
+                        names.Add(civilDoc.Styles.AlignmentStyles[i].ToString());
+                }
+                catch
+                {
+                }
+            }
+
+            return names.Distinct().OrderBy(x => x).ToList();
+        }
+
+        private static List<string> GetAlignmentLabelSetNames(CivilDocument civilDoc)
+        {
+            var names = new List<string>();
+
+            foreach (ObjectId id in civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles)
+            {
+                try
+                {
+                    names.Add(civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles[id]);
+                }
+                catch
+                {
+                    // fallback ignorado
+                }
+            }
+
+            if (names.Count == 0)
+            {
+                try
+                {
+                    for (int i = 0; i < civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles.Count; i++)
+                        names.Add(civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles[i].ToString());
+                }
+                catch
+                {
+                }
+            }
+
+            return names.Distinct().OrderBy(x => x).ToList();
+        }
+    }
+}

@@ -1,10 +1,14 @@
-﻿using System;
-using System.Linq;
+﻿// RibbonInitializer.cs
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.Windows;
+using System;
+using System.Linq;
+using System.Runtime.Versioning;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace HelloCivil3D.Ribbon
 {
+    [SupportedOSPlatform("windows")]
     public static class RibbonInitializer
     {
         private const string TabId = "PL_ENGENHARIA_TAB";
@@ -110,6 +114,7 @@ namespace HelloCivil3D.Ribbon
         }
     }
 
+    [SupportedOSPlatform("windows")]
     public class RibbonCommandHandler : System.Windows.Input.ICommand
     {
         public event EventHandler? CanExecuteChanged;
