@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
 
 namespace HelloCivil3D.Services
@@ -93,7 +92,7 @@ namespace HelloCivil3D.Services
             {
                 try
                 {
-                    if (tr.GetObject(polyId, OpenMode.ForRead) is not Entity entity)
+                    if (tr.GetObject(polyId, OpenMode.ForRead) is not Autodesk.AutoCAD.DatabaseServices.Entity entity)
                     {
                         resultado.MensagensErro.Add($"Entidade {polyId.Handle} não pôde ser aberta.");
                         continue;
@@ -180,7 +179,7 @@ namespace HelloCivil3D.Services
 
             foreach (ObjectId id in ms)
             {
-                if (tr.GetObject(id, OpenMode.ForRead) is not Entity ent)
+                if (tr.GetObject(id, OpenMode.ForRead) is not Autodesk.AutoCAD.DatabaseServices.Entity ent)
                     continue;
 
                 if (!string.Equals(ent.Layer, layerName, StringComparison.OrdinalIgnoreCase))
@@ -310,7 +309,7 @@ namespace HelloCivil3D.Services
         {
             foreach (ObjectId siteId in civilDoc.GetSiteIds())
             {
-                if (tr.GetObject(siteId, OpenMode.ForRead) is not Site site)
+                if (tr.GetObject(siteId, OpenMode.ForRead) is not Autodesk.Civil.DatabaseServices.Site site)
                     continue;
 
                 if (string.Equals(site.Name, siteName, StringComparison.OrdinalIgnoreCase))

@@ -10,8 +10,6 @@ using HelloCivil3D.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace HelloCivil3D.Commands
 {
@@ -207,6 +205,8 @@ namespace HelloCivil3D.Commands
 
         private static bool? PromptForYesNo(Editor ed, string message, bool defaultValue)
         {
+            const string Sim = "Sim";
+            const string Nao = "Nao";
             string defaultKeyword = defaultValue ? "Sim" : "Nao";
             var opts = new PromptKeywordOptions(
                 $"{message} [{nameof(Sim)}/{nameof(Nao)}] <{defaultKeyword}>: ",
@@ -223,9 +223,6 @@ namespace HelloCivil3D.Commands
                 return defaultValue;
 
             return string.Equals(res.StringResult, "Sim", StringComparison.OrdinalIgnoreCase);
-
-            static string Sim => "Sim";
-            static string Nao => "Nao";
         }
 
         private static List<string> GetAllLayerNames(Database db)
@@ -252,7 +249,7 @@ namespace HelloCivil3D.Commands
             using Transaction tr = db.TransactionManager.StartTransaction();
             foreach (ObjectId siteId in civilDoc.GetSiteIds())
             {
-                if (tr.GetObject(siteId, OpenMode.ForRead) is Site site)
+                if (tr.GetObject(siteId, OpenMode.ForRead) is Autodesk.Civil.DatabaseServices.Site site)
                     names.Add(site.Name);
             }
 
@@ -264,29 +261,13 @@ namespace HelloCivil3D.Commands
         {
             var names = new List<string>();
 
-            foreach (ObjectId id in civilDoc.Styles.AlignmentStyles)
+            try
             {
-                try
-                {
-                    names.Add(civilDoc.Styles.AlignmentStyles[id]);
-                }
-                catch
-                {
-                    // fallback ignorado
-                }
+                for (int i = 0; i < civilDoc.Styles.AlignmentStyles.Count; i++)
+                    names.Add(civilDoc.Styles.AlignmentStyles[i].ToString());
             }
-
-            // Fallback simples caso a enumeração acima não devolva nomes
-            if (names.Count == 0)
+            catch
             {
-                try
-                {
-                    for (int i = 0; i < civilDoc.Styles.AlignmentStyles.Count; i++)
-                        names.Add(civilDoc.Styles.AlignmentStyles[i].ToString());
-                }
-                catch
-                {
-                }
             }
 
             return names.Distinct().OrderBy(x => x).ToList();
@@ -296,28 +277,13 @@ namespace HelloCivil3D.Commands
         {
             var names = new List<string>();
 
-            foreach (ObjectId id in civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles)
+            try
             {
-                try
-                {
-                    names.Add(civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles[id]);
-                }
-                catch
-                {
-                    // fallback ignorado
-                }
+                for (int i = 0; i < civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles.Count; i++)
+                    names.Add(civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles[i].ToString());
             }
-
-            if (names.Count == 0)
+            catch
             {
-                try
-                {
-                    for (int i = 0; i < civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles.Count; i++)
-                        names.Add(civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles[i].ToString());
-                }
-                catch
-                {
-                }
             }
 
             return names.Distinct().OrderBy(x => x).ToList();

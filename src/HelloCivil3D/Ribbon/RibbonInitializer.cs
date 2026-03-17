@@ -1,9 +1,9 @@
 ﻿// RibbonInitializer.cs
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.Windows;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.Windows;
 
 namespace HelloCivil3D.Ribbon
 {
