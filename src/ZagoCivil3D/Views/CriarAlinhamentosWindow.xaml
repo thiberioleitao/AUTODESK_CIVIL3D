@@ -1,4 +1,4 @@
-﻿<Window x:Class="HelloCivil3D.Views.CriarAlinhamentosWindow"
+﻿<Window x:Class="ZagoCivil3D.Views.CriarAlinhamentosWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -89,30 +89,14 @@
                                   ItemsSource="{Binding Layers}"
                                   SelectedItem="{Binding LayerSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-						<TextBlock Grid.Row="1"
-                                   Grid.Column="0"
-                                   Margin="0,9,0,0"
-                                   Text="Site"
-                                   FontSize="14"
-                                   Foreground="#FF444444" />
-						<ComboBox x:Name="SiteComboBox"
-                                  Grid.Row="1"
-                                  Grid.Column="2"
-                                  Height="36"
-                                  Margin="0,0,0,14"
-                                  Padding="8,4"
-                                  FontSize="14"
-                                  ItemsSource="{Binding Sites}"
-                                  SelectedItem="{Binding SiteSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-						<TextBlock Grid.Row="2"
+                     <TextBlock Grid.Row="1"
                                    Grid.Column="0"
                                    Margin="0,9,0,0"
                                    Text="Style"
                                    FontSize="14"
                                    Foreground="#FF444444" />
 						<ComboBox x:Name="StyleComboBox"
-                                  Grid.Row="2"
+                                  Grid.Row="1"
                                   Grid.Column="2"
                                   Height="36"
                                   Margin="0,0,0,14"
@@ -121,14 +105,14 @@
                                   ItemsSource="{Binding Styles}"
                                   SelectedItem="{Binding StyleSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-						<TextBlock Grid.Row="3"
+                     <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Margin="0,9,0,0"
                                    Text="LabelSet"
                                    FontSize="14"
                                    Foreground="#FF444444" />
 						<ComboBox x:Name="LabelSetComboBox"
-                                  Grid.Row="3"
+                                  Grid.Row="2"
                                   Grid.Column="2"
                                   Height="36"
                                   Margin="0,0,0,14"
@@ -137,14 +121,14 @@
                                   ItemsSource="{Binding LabelSets}"
                                   SelectedItem="{Binding LabelSetSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-						<TextBlock Grid.Row="4"
+                     <TextBlock Grid.Row="3"
                                    Grid.Column="0"
                                    Margin="0,9,0,0"
                                    Text="Prefixo"
                                    FontSize="14"
                                    Foreground="#FF444444" />
 						<TextBox x:Name="PrefixoTextBox"
-                                 Grid.Row="4"
+                                 Grid.Row="3"
                                  Grid.Column="2"
                                  Height="36"
                                  Margin="0,0,0,14"
@@ -152,7 +136,22 @@
                                  FontSize="14"
                                  Text="{Binding Prefixo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-						<TextBlock Grid.Row="5"
+                     <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Margin="0,9,0,0"
+                                   Text="Zona (texto)"
+                                   FontSize="14"
+                                   Foreground="#FF444444" />
+                        <TextBox x:Name="ZonaTextBox"
+                                 Grid.Row="4"
+                                 Grid.Column="2"
+                                 Height="36"
+                                 Margin="0,0,0,14"
+                                 Padding="8,4"
+                                 FontSize="14"
+                                 Text="{Binding ZonaTexto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                     <TextBlock Grid.Row="5"
                                    Grid.Column="0"
                                    Margin="0,9,0,0"
                                    Text="Numero inicial"
@@ -167,7 +166,7 @@
                                  FontSize="14"
                                  Text="{Binding NumeroInicialTexto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-						<TextBlock Grid.Row="6"
+                        <TextBlock Grid.Row="6"
                                    Grid.Column="0"
                                    Margin="0,9,0,0"
                                    Text="Incremento"
@@ -215,12 +214,12 @@
                             Width="110"
                             Height="36"
                             Margin="0,0,10,0"
-                            Click="CancelarButton_Click"
+                            Click="AoClicarCancelar"
                             Content="Cancelar" />
 					<Button x:Name="ConfirmarButton"
                             Width="130"
                             Height="36"
-                            Click="ConfirmarButton_Click"
+                            Click="AoClicarConfirmar"
                             Content="Confirmar" />
 				</StackPanel>
 			</DockPanel>

@@ -7,7 +7,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloCivil3D", "src\HelloCivil3D\HelloCivil3D.csproj", "{5052DF29-B82E-1C84-EC42-388927B9C6FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZagoCivil3D", "src\ZagoCivil3D\ZagoCivil3D.csproj", "{5052DF29-B82E-1C84-EC42-388927B9C6FB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dynamo", "Dynamo", "{370B31B7-5833-4661-980A-8C8AFB203AD0}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Dropbox\PADRAO ZAGO\HDR\DYNAMO\1. CRIAR ELEMENTOS\ALINHAMENTOS\1.0 - CRIAR ALINHAMENTOS A PARTIR DE POLILINHAS COM BASE NAS ZONAS-SITES-2026.01.22.dyn = ..\..\..\Dropbox\PADRAO ZAGO\HDR\DYNAMO\1. CRIAR ELEMENTOS\ALINHAMENTOS\1.0 - CRIAR ALINHAMENTOS A PARTIR DE POLILINHAS COM BASE NAS ZONAS-SITES-2026.01.22.dyn
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

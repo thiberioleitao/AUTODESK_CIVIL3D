@@ -1,12 +1,12 @@
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
-using HelloCivil3D.Commands;
+using ZagoCivil3D.Commands;
 
-[assembly: ExtensionApplication(typeof(HelloCivil3D.PluginEntry))]
-[assembly: CommandClass(typeof(HelloCivil3D.PluginEntry))]
+[assembly: ExtensionApplication(typeof(ZagoCivil3D.PluginEntry))]
+[assembly: CommandClass(typeof(ZagoCivil3D.PluginEntry))]
 [assembly: CommandClass(typeof(CriarAlinhamentosCommand))]
 
-namespace HelloCivil3D;
+namespace ZagoCivil3D;
 
 /// <summary>
 /// Ponto de entrada do plugin para inicialização no NETLOAD.
@@ -20,12 +20,12 @@ public sealed class PluginEntry : IExtensionApplication
     /// </summary>
     public void Initialize()
     {
-        WriteLog("Initialize iniciado via NETLOAD.");
+        EscreverLog("Initialize iniciado via NETLOAD.");
 
         //Classe RibbonInitializer dentro do namespace Ribbon
-        Ribbon.RibbonInitializer.InitializeRibbon();
+        Ribbon.RibbonInitializer.InicializarRibbon();
 
-        WriteLog("Initialize finalizado.");
+        EscreverLog("Initialize finalizado.");
     }
 
     /// <summary>
@@ -33,22 +33,22 @@ public sealed class PluginEntry : IExtensionApplication
     /// </summary>
     public void Terminate()
     {
-        WriteLog("Terminate chamado.");
+        EscreverLog("Terminate chamado.");
     }
 
     /// <summary>
     /// Comando auxiliar para forçar a recriação da ribbon durante debug.
     /// </summary>
     [CommandMethod("PL_DEBUG_RIBBON")]
-    public void DebugRibbon()
+    public void DepurarRibbon()
     {
-        WriteLog("PL_DEBUG_RIBBON executado.");
-        Ribbon.RibbonInitializer.InitializeRibbon();
+        EscreverLog("PL_DEBUG_RIBBON executado.");
+        Ribbon.RibbonInitializer.InicializarRibbon();
     }
 
-    private static void WriteLog(string message)
+    private static void EscreverLog(string mensagem)
     {
-        var doc = Application.DocumentManager.MdiActiveDocument;
-        doc?.Editor.WriteMessage($"\n[HelloCivil3D] {message}");
+        var documento = Application.DocumentManager.MdiActiveDocument;
+        documento?.Editor.WriteMessage($"\n[ZagoCivil3D] {mensagem}");
     }
 }

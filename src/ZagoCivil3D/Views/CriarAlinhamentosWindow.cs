@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
-namespace HelloCivil3D.Views;
+namespace ZagoCivil3D.Views;
 
 /// <summary>
 /// Tela de coleta de parâmetros de criação de alignments.
@@ -12,59 +12,57 @@ namespace HelloCivil3D.Views;
 public partial class CriarAlinhamentosWindow : Window
 {
     public CriarAlinhamentosWindow(
-		IReadOnlyList<string> layers,
-		IReadOnlyList<string> sites,
-		IReadOnlyList<string> styles,
-		IReadOnlyList<string> labelSets)
+       IReadOnlyList<string> camadas,
+		IReadOnlyList<string> estilos,
+		IReadOnlyList<string> conjuntosRotulos)
 	{
 		InitializeComponent();
 
-		LayerComboBox.ItemsSource = layers;
-		SiteComboBox.ItemsSource = sites;
-		StyleComboBox.ItemsSource = styles;
-		LabelSetComboBox.ItemsSource = labelSets;
+        LayerComboBox.ItemsSource = camadas;
+		StyleComboBox.ItemsSource = estilos;
+		LabelSetComboBox.ItemsSource = conjuntosRotulos;
 
-		LayerComboBox.SelectedItem = layers.FirstOrDefault();
-		SiteComboBox.SelectedItem = sites.FirstOrDefault();
-		StyleComboBox.SelectedItem = styles.FirstOrDefault();
-		LabelSetComboBox.SelectedItem = labelSets.FirstOrDefault();
+        LayerComboBox.SelectedItem = camadas.FirstOrDefault();
+		StyleComboBox.SelectedItem = estilos.FirstOrDefault();
+		LabelSetComboBox.SelectedItem = conjuntosRotulos.FirstOrDefault();
 
 		PrefixoTextBox.Text = "D";
+        ZonaTextBox.Text = "01";
 		NumeroInicialTextBox.Text = "1";
 		IncrementoTextBox.Text = "1";
 		ApagarPolilinhasCheckBox.IsChecked = false;
 	}
 
-	public string SourceLayerName => LayerComboBox.SelectedItem?.ToString()?.Trim() ?? string.Empty;
-	public string SiteName => SiteComboBox.SelectedItem?.ToString()?.Trim() ?? string.Empty;
-	public string AlignmentStyleName => StyleComboBox.SelectedItem?.ToString()?.Trim() ?? string.Empty;
-	public string AlignmentLabelSetName => LabelSetComboBox.SelectedItem?.ToString()?.Trim() ?? string.Empty;
+    public string NomeCamadaOrigem => LayerComboBox.SelectedItem?.ToString()?.Trim() ?? string.Empty;
+	public string NomeEstiloAlinhamento => StyleComboBox.SelectedItem?.ToString()?.Trim() ?? string.Empty;
+	public string NomeConjuntoRotulosAlinhamento => LabelSetComboBox.SelectedItem?.ToString()?.Trim() ?? string.Empty;
 	public string Prefixo => PrefixoTextBox.Text?.Trim() ?? string.Empty;
+    public string IdentificadorZona => ZonaTextBox.Text?.Trim() ?? string.Empty;
 	public bool ApagarPolilinhasOriginais => ApagarPolilinhasCheckBox.IsChecked == true;
 
 	public int NumeroInicial => int.Parse(NumeroInicialTextBox.Text.Trim());
 	public int Incremento => int.Parse(IncrementoTextBox.Text.Trim());
 
-    private void CancelarButton_Click(object sender, RoutedEventArgs e)
+    private void AoClicarCancelar(object sender, RoutedEventArgs e)
 	{
 		DialogResult = false;
 		Close();
 	}
 
-    private void ConfirmarButton_Click(object sender, RoutedEventArgs e)
+    private void AoClicarConfirmar(object sender, RoutedEventArgs e)
 	{
       // A validação ocorre na borda da UI para impedir requests inválidos
 		// chegarem ao serviço de domínio.
-		if (string.IsNullOrWhiteSpace(SourceLayerName)
-			|| string.IsNullOrWhiteSpace(SiteName)
-			|| string.IsNullOrWhiteSpace(AlignmentStyleName)
-			|| string.IsNullOrWhiteSpace(AlignmentLabelSetName)
+      if (string.IsNullOrWhiteSpace(NomeCamadaOrigem)
+			|| string.IsNullOrWhiteSpace(NomeEstiloAlinhamento)
+			|| string.IsNullOrWhiteSpace(NomeConjuntoRotulosAlinhamento)
+          || string.IsNullOrWhiteSpace(IdentificadorZona)
 			|| string.IsNullOrWhiteSpace(Prefixo))
 		{
 			MessageBox.Show(
 				this,
 				"Preencha os campos obrigatórios antes de confirmar.",
-				"HelloCivil3D",
+             "ZagoCivil3D",
 				MessageBoxButton.OK,
 				MessageBoxImage.Warning);
 			return;
@@ -75,7 +73,7 @@ public partial class CriarAlinhamentosWindow : Window
 			MessageBox.Show(
 				this,
 				"Informe um Número inicial válido maior que zero.",
-				"HelloCivil3D",
+             "ZagoCivil3D",
 				MessageBoxButton.OK,
 				MessageBoxImage.Warning);
 			return;
@@ -86,7 +84,7 @@ public partial class CriarAlinhamentosWindow : Window
 			MessageBox.Show(
 				this,
 				"Informe um Incremento válido maior que zero.",
-				"HelloCivil3D",
+             "ZagoCivil3D",
 				MessageBoxButton.OK,
 				MessageBoxImage.Warning);
 			return;
