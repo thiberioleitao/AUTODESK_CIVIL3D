@@ -144,8 +144,6 @@ namespace ZagoCivil3D.Ribbon
                     "ZAGO_TERRAPLENAGEM_FEATURE_LINES_SEPARADAS ",
                     "TP");
 
-                ribbon.ActiveTab = abaDrenagem;
-
                 documento?.Editor.WriteMessage("\n[ZagoCivil3D] Aba e botão criados com sucesso.");
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Aba ativa: {ribbon.ActiveTab?.Id ?? "(nenhuma)"}");
             }

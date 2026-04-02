@@ -29,7 +29,7 @@
                            FontSize="22"
                            FontWeight="SemiBold"
                            Foreground="#FF2D2D2D" />
-                <TextBlock Text="Replica em C# o fluxo do Dynamo: filtra feature lines por poligono, ajusta deflexao e executa a etapa iterativa de comparacao com a superficie."
+                <TextBlock Text="Replica em C# o fluxo do Dynamo: filtra feature lines por poligono fechado, ajusta a deflexao e executa a etapa iterativa de comparacao com a superficie base."
                            Margin="0,8,0,0"
                            FontSize="13"
                            Foreground="#FF6A6A6A"
@@ -45,7 +45,7 @@
                         BorderBrush="#FFD8D8D8"
                         BorderThickness="1"
                         Padding="12,9">
-                    <TextBlock Text="Inputs"
+                    <TextBlock Text="Parametros"
                                FontSize="14"
                                FontWeight="SemiBold"
                                Foreground="#FF555555" />
@@ -72,7 +72,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Site" FontSize="14" Foreground="#FF444444" />
                         <ComboBox x:Name="SiteComboBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Layer do poligono de filtro" FontSize="14" Foreground="#FF444444" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Layer do poligono fechado" FontSize="14" Foreground="#FF444444" />
                         <ComboBox x:Name="LayerComboBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14" />
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Superficie base" FontSize="14" Foreground="#FF444444" />
@@ -106,7 +106,7 @@
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Deflexao limite" FontSize="14" Foreground="#FF444444" />
                             <TextBox x:Name="DeflexaoLimiteTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Numero maximo de pontos por FL" FontSize="14" Foreground="#FF444444" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Numero maximo de pontos por feature line" FontSize="14" Foreground="#FF444444" />
                             <TextBox x:Name="NumeroMaximoPontosTextBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Passo incremental do ajuste de cota" FontSize="14" Foreground="#FF444444" />
@@ -143,7 +143,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Numero de tentativas por ponto" FontSize="14" Foreground="#FF444444" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Numero maximo de tentativas por ponto" FontSize="14" Foreground="#FF444444" />
                             <TextBox x:Name="NumeroTentativasTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14" />
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Tolerancia baixa da superficie" FontSize="14" Foreground="#FF444444" />
@@ -168,7 +168,7 @@
             <DockPanel LastChildFill="False">
                 <TextBlock DockPanel.Dock="Left"
                            VerticalAlignment="Center"
-                           Text="O comando executa o processamento diretamente nas feature lines do desenho atual."
+                           Text="O comando altera diretamente as feature lines do desenho atual."
                            FontSize="13"
                            Foreground="#FF666666" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">

@@ -31,12 +31,11 @@ public partial class TerraplenagemFeatureLinesWindow : Window
         LayerComboBox.ItemsSource = camadas;
         SurfaceComboBox.ItemsSource = superficies;
 
-        SiteComboBox.SelectedItem = sites.FirstOrDefault(x => string.Equals(x, "TER - SUL", StringComparison.OrdinalIgnoreCase))
-            ?? sites.FirstOrDefault();
-        LayerComboBox.SelectedItem = camadas.FirstOrDefault(x => string.Equals(x, "ZAGO-SELECIONAR FEATURELINES", StringComparison.OrdinalIgnoreCase))
-            ?? camadas.FirstOrDefault();
-        SurfaceComboBox.SelectedItem = superficies.FirstOrDefault(x => string.Equals(x, "0. Primitivo B", StringComparison.OrdinalIgnoreCase))
-            ?? superficies.FirstOrDefault();
+        // Os presets abaixo sao apenas conveniencias baseadas no desenho de referencia.
+        // Quando nao existirem, a tela cai para o primeiro item disponivel.
+        SiteComboBox.SelectedItem = SelecionarValorPreferencial(sites, "TER - SUL");
+        LayerComboBox.SelectedItem = SelecionarValorPreferencial(camadas, "ZAGO-SELECIONAR FEATURELINES");
+        SurfaceComboBox.SelectedItem = SelecionarValorPreferencial(superficies, "0. Primitivo B");
 
         DeflexaoLimiteTextBox.Text = "0.0129";
         NumeroMaximoPontosTextBox.Text = "1000";
@@ -84,7 +83,7 @@ public partial class TerraplenagemFeatureLinesWindow : Window
         {
             MessageBox.Show(
                 this,
-                "Preencha os campos obrigatorios antes de confirmar.",
+                "Preencha os campos obrigatorios antes de executar.",
                 "ZagoCivil3D",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -160,6 +159,17 @@ public partial class TerraplenagemFeatureLinesWindow : Window
         };
 
         return true;
+    }
+
+    /// <summary>
+    /// Tenta aplicar um preset conhecido sem tornar a tela dependente dele.
+    /// </summary>
+    private static string? SelecionarValorPreferencial(
+        IReadOnlyList<string> itens,
+        string valorPreferencial)
+    {
+        return itens.FirstOrDefault(x => string.Equals(x, valorPreferencial, StringComparison.OrdinalIgnoreCase))
+            ?? itens.FirstOrDefault();
     }
 
     /// <summary>

@@ -49,9 +49,9 @@ public class TerraplenagemFeatureLinesCommand
             editor.WriteMessage("\n");
             editor.WriteMessage("\n===== RESUMO TERRAPLENAGEM =====");
             editor.WriteMessage($"\nFeature lines no site: {resultado.TotalFeatureLinesNoSite}");
-            editor.WriteMessage($"\nFeature lines filtradas pelo poligono: {resultado.TotalFeatureLinesFiltradas}");
-            editor.WriteMessage($"\nFeature lines com ajuste de deflexao: {resultado.TotalFeatureLinesComDeflexaoAjustada}");
-            editor.WriteMessage($"\nFeature lines com ajuste por superficie: {resultado.TotalFeatureLinesComSuperficieAjustada}");
+            editor.WriteMessage($"\nFeature lines dentro do poligono: {resultado.TotalFeatureLinesFiltradas}");
+            editor.WriteMessage($"\nFeature lines com ajuste de deflexao aplicado: {resultado.TotalFeatureLinesComDeflexaoAjustada}");
+            editor.WriteMessage($"\nFeature lines com ajuste por superficie aplicado: {resultado.TotalFeatureLinesComSuperficieAjustada}");
 
             if (resultado.Logs.Count > 0)
             {

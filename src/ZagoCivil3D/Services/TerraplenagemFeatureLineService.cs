@@ -18,12 +18,19 @@ namespace ZagoCivil3D.Services;
 public static class TerraplenagemFeatureLineService
 {
     /// <summary>
-    /// Tolerancia usada para comparar coordenadas XY entre PI points e all points.
+    /// Tolerancia XY usada para mapear um PI point na colecao AllPoints.
+    /// O valor e pequeno, mas tolera diferencas numericas residuais.
     /// </summary>
-    private const double ToleranciaComparacaoXY = 1e-6;
+    private const double ToleranciaMapeamentoXY = 1e-4;
 
     /// <summary>
-    /// Executa o fluxo completo de terraplenagem dentro de uma unica transacao.
+    /// Tolerancia usada para considerar um ponto sobre a borda do poligono.
+    /// </summary>
+    private const double ToleranciaBordaPoligono = 1e-8;
+
+    /// <summary>
+    /// Executa o fluxo completo de terraplenagem.
+    /// A leitura inicial e separada da escrita para evitar uma transacao unica muito longa.
     /// </summary>
     public static TerraplenagemFeatureLinesResultado Executar(
         CivilDocument civilDoc,
@@ -33,69 +40,119 @@ public static class TerraplenagemFeatureLineService
     {
         var resultado = new TerraplenagemFeatureLinesResultado();
 
+        PreparacaoTerraplenagem? preparacao = PrepararExecucao(civilDoc, db, request, resultado);
+        if (preparacao == null)
+            return resultado;
+
+        // Esses totais sao exibidos ao usuario ao final do comando.
+        resultado.TotalFeatureLinesNoSite = preparacao.TotalFeatureLinesNoSite;
+        resultado.TotalFeatureLinesFiltradas = preparacao.IdsFeatureLinesFiltradas.Count;
+
+        if (preparacao.IdsFeatureLinesFiltradas.Count == 0)
+        {
+            resultado.MensagensErro.Add(
+                "Nenhuma feature line do site permaneceu totalmente dentro do poligono informado.");
+            return resultado;
+        }
+
+        foreach (ObjectId idFeatureLine in preparacao.IdsFeatureLinesFiltradas)
+            ProcessarFeatureLine(db, preparacao.IdSuperficieBase, idFeatureLine, request, resultado);
+
+        ed.WriteMessage("\n[ZagoCivil3D] Fluxo de terraplenagem concluido.");
+        return resultado;
+    }
+
+    /// <summary>
+    /// Reune todos os dados de leitura necessarios antes de iniciar as alteracoes.
+    /// </summary>
+    private static PreparacaoTerraplenagem? PrepararExecucao(
+        CivilDocument civilDoc,
+        Database db,
+        TerraplenagemFeatureLinesRequest request,
+        TerraplenagemFeatureLinesResultado resultado)
+    {
         using Transaction transacao = db.TransactionManager.StartTransaction();
 
         Site? site = ObterSitePorNome(civilDoc, transacao, request.NomeSite);
         if (site == null)
         {
             resultado.MensagensErro.Add($"Site '{request.NomeSite}' nao encontrado.");
-            return resultado;
+            return null;
         }
 
         TinSurface? superficieBase = ObterSuperficiePorNome(civilDoc, transacao, request.NomeSuperficieBase);
         if (superficieBase == null)
         {
-            resultado.MensagensErro.Add($"Superficie '{request.NomeSuperficieBase}' nao encontrada.");
-            return resultado;
+            resultado.MensagensErro.Add($"Superficie base '{request.NomeSuperficieBase}' nao encontrada.");
+            return null;
         }
 
-        List<Point2d> verticesPoligono = ObterVerticesPoligonoDaCamada(db, transacao, request.NomeCamadaPoligono);
-        if (verticesPoligono.Count < 3)
+        ResultadoSelecaoPoligono selecaoPoligono =
+            SelecionarPoligonoDaLayer(db, transacao, request.NomeCamadaPoligono);
+
+        if (!selecaoPoligono.Sucesso)
         {
-            resultado.MensagensErro.Add(
-                $"Nao foi encontrado um poligono fechado valido na layer '{request.NomeCamadaPoligono}'.");
-            return resultado;
+            resultado.MensagensErro.Add(selecaoPoligono.Mensagem);
+            return null;
         }
 
         List<ObjectId> idsFeatureLines = site.GetFeatureLineIds().Cast<ObjectId>().ToList();
-        resultado.TotalFeatureLinesNoSite = idsFeatureLines.Count;
-
-        List<ObjectId> idsFiltrados = FiltrarFeatureLinesDentroPoligono(transacao, idsFeatureLines, verticesPoligono);
-        resultado.TotalFeatureLinesFiltradas = idsFiltrados.Count;
-
-        if (idsFiltrados.Count == 0)
-        {
-            resultado.MensagensErro.Add("Nenhuma feature line do site ficou totalmente dentro do poligono informado.");
-            return resultado;
-        }
-
-        foreach (ObjectId idFeatureLine in idsFiltrados)
-        {
-            if (transacao.GetObject(idFeatureLine, OpenMode.ForWrite) is not FeatureLine featureLine)
-            {
-                resultado.MensagensErro.Add($"Nao foi possivel abrir a feature line {idFeatureLine.Handle} para escrita.");
-                continue;
-            }
-
-            try
-            {
-                bool ajustouDeflexao = AjustarDeflexao(featureLine, request, resultado.Logs);
-                if (ajustouDeflexao)
-                    resultado.TotalFeatureLinesComDeflexaoAjustada++;
-
-                bool ajustouSuperficie = AjustarPorSuperficie(featureLine, superficieBase, request, resultado.Logs);
-                if (ajustouSuperficie)
-                    resultado.TotalFeatureLinesComSuperficieAjustada++;
-            }
-            catch (Exception ex)
-            {
-                resultado.MensagensErro.Add($"Erro ao processar a feature line '{featureLine.Name}': {ex.Message}");
-            }
-        }
+        List<ObjectId> idsFiltrados = FiltrarFeatureLinesDentroPoligono(
+            transacao,
+            idsFeatureLines,
+            selecaoPoligono.Vertices,
+            resultado.Logs);
 
         transacao.Commit();
-        ed.WriteMessage("\n[ZagoCivil3D] Fluxo de terraplenagem concluido.");
-        return resultado;
+
+        return new PreparacaoTerraplenagem(
+            superficieBase.ObjectId,
+            idsFeatureLines.Count,
+            idsFiltrados);
+    }
+
+    /// <summary>
+    /// Processa uma unica feature line em sua propria transacao de escrita.
+    /// </summary>
+    private static void ProcessarFeatureLine(
+        Database db,
+        ObjectId idSuperficieBase,
+        ObjectId idFeatureLine,
+        TerraplenagemFeatureLinesRequest request,
+        TerraplenagemFeatureLinesResultado resultado)
+    {
+        using Transaction transacao = db.TransactionManager.StartTransaction();
+
+        if (transacao.GetObject(idFeatureLine, OpenMode.ForWrite) is not FeatureLine featureLine)
+        {
+            resultado.MensagensErro.Add(
+                $"Nao foi possivel abrir a feature line {idFeatureLine.Handle} para escrita.");
+            return;
+        }
+
+        if (transacao.GetObject(idSuperficieBase, OpenMode.ForRead) is not TinSurface superficieBase)
+        {
+            resultado.MensagensErro.Add("Nao foi possivel reabrir a superficie base para leitura.");
+            return;
+        }
+
+        try
+        {
+            bool ajustouDeflexao = AjustarDeflexao(featureLine, request, resultado.Logs);
+            if (ajustouDeflexao)
+                resultado.TotalFeatureLinesComDeflexaoAjustada++;
+
+            bool ajustouSuperficie = AjustarPorSuperficie(featureLine, superficieBase, request, resultado.Logs);
+            if (ajustouSuperficie)
+                resultado.TotalFeatureLinesComSuperficieAjustada++;
+
+            transacao.Commit();
+        }
+        catch (System.Exception ex)
+        {
+            resultado.MensagensErro.Add(
+                $"Erro ao processar a feature line '{featureLine.Name}': {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -133,10 +190,42 @@ public static class TerraplenagemFeatureLineService
     }
 
     /// <summary>
-    /// Replica a etapa do Dynamo que pega o primeiro objeto da layer e usa sua geometria como filtro.
+    /// Seleciona o poligono fechado da layer informada.
+    /// O metodo falha explicitamente quando nao existe poligono valido
+    /// ou quando existe mais de um candidato valido na mesma layer.
     /// </summary>
-    private static List<Point2d> ObterVerticesPoligonoDaCamada(Database db, Transaction transacao, string nomeCamada)
+    private static ResultadoSelecaoPoligono SelecionarPoligonoDaLayer(
+        Database db,
+        Transaction transacao,
+        string nomeCamada)
     {
+        List<CandidatoPoligono> candidatos = ObterPoligonosValidosDaLayer(db, transacao, nomeCamada);
+
+        if (candidatos.Count == 0)
+        {
+            return ResultadoSelecaoPoligono.Falha(
+                $"Nenhum poligono fechado valido foi encontrado na layer '{nomeCamada}'.");
+        }
+
+        if (candidatos.Count > 1)
+        {
+            string handles = string.Join(", ", candidatos.Select(x => $"{x.Tipo} {x.Handle}"));
+            return ResultadoSelecaoPoligono.Falha(
+                $"A layer '{nomeCamada}' possui mais de um poligono fechado valido ({handles}). Ajuste a layer ou mantenha apenas um poligono de filtro.");
+        }
+
+        return ResultadoSelecaoPoligono.SucessoCom(candidatos[0].Vertices);
+    }
+
+    /// <summary>
+    /// Localiza todas as entidades fechadas suportadas que podem servir como poligono de filtro.
+    /// </summary>
+    private static List<CandidatoPoligono> ObterPoligonosValidosDaLayer(
+        Database db,
+        Transaction transacao,
+        string nomeCamada)
+    {
+        var candidatos = new List<CandidatoPoligono>();
         var tabelaBlocos = (BlockTable)transacao.GetObject(db.BlockTableId, OpenMode.ForRead);
         var espacoModelo =
             (BlockTableRecord)transacao.GetObject(tabelaBlocos[BlockTableRecord.ModelSpace], OpenMode.ForRead);
@@ -157,11 +246,17 @@ public static class TerraplenagemFeatureLineService
                 _ => new List<Point2d>()
             };
 
-            if (vertices.Count >= 3)
-                return vertices;
+            if (vertices.Count < 3)
+                continue;
+
+            candidatos.Add(
+                new CandidatoPoligono(
+                    entidade.GetType().Name,
+                    entidade.Handle.ToString(),
+                    vertices));
         }
 
-        return new List<Point2d>();
+        return candidatos;
     }
 
     /// <summary>
@@ -219,12 +314,14 @@ public static class TerraplenagemFeatureLineService
     }
 
     /// <summary>
-    /// Mantem apenas as feature lines cujos pontos inicial e final estao dentro do poligono.
+    /// Mantem apenas as feature lines cujos pontos relevantes permanecem dentro do poligono.
+    /// O filtro usa todos os AllPoints quando disponiveis e cai para PI points apenas como fallback.
     /// </summary>
     private static List<ObjectId> FiltrarFeatureLinesDentroPoligono(
         Transaction transacao,
         IReadOnlyCollection<ObjectId> idsFeatureLines,
-        IReadOnlyList<Point2d> verticesPoligono)
+        IReadOnlyList<Point2d> verticesPoligono,
+        ICollection<string> logs)
     {
         var filtradas = new List<ObjectId>();
 
@@ -233,17 +330,25 @@ public static class TerraplenagemFeatureLineService
             if (transacao.GetObject(idFeatureLine, OpenMode.ForRead) is not FeatureLine featureLine)
                 continue;
 
-            Point3dCollection pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
-            if (pontosPi.Count < 2)
+            Point3dCollection pontosRelevantes = ObterPontosParaFiltroEspacial(featureLine);
+            if (pontosRelevantes.Count == 0)
+            {
+                logs.Add(
+                    $"'{featureLine.Name}': falha geometrica no filtro espacial, a feature line nao possui pontos analisaveis.");
                 continue;
+            }
 
-            Point3d pontoInicial = pontosPi[0];
-            Point3d pontoFinal = pontosPi[pontosPi.Count - 1];
+            bool todosDentro = true;
+            foreach (Point3d ponto in pontosRelevantes)
+            {
+                if (PontoDentroPoligono(new Point2d(ponto.X, ponto.Y), verticesPoligono))
+                    continue;
 
-            bool dentroInicial = PontoDentroPoligono(new Point2d(pontoInicial.X, pontoInicial.Y), verticesPoligono);
-            bool dentroFinal = PontoDentroPoligono(new Point2d(pontoFinal.X, pontoFinal.Y), verticesPoligono);
+                todosDentro = false;
+                break;
+            }
 
-            if (dentroInicial && dentroFinal)
+            if (todosDentro)
                 filtradas.Add(idFeatureLine);
         }
 
@@ -251,10 +356,32 @@ public static class TerraplenagemFeatureLineService
     }
 
     /// <summary>
+    /// Retorna a colecao de pontos usada no filtro espacial.
+    /// </summary>
+    private static Point3dCollection ObterPontosParaFiltroEspacial(FeatureLine featureLine)
+    {
+        Point3dCollection todosOsPontos = featureLine.GetPoints(FeatureLinePointType.AllPoints);
+        if (todosOsPontos.Count > 0)
+            return todosOsPontos;
+
+        return featureLine.GetPoints(FeatureLinePointType.PIPoint);
+    }
+
+    /// <summary>
     /// Implementa o algoritmo de ray casting usado no script Python do Dynamo.
+    /// Pontos sobre a borda do poligono sao tratados como internos.
     /// </summary>
     private static bool PontoDentroPoligono(Point2d ponto, IReadOnlyList<Point2d> poligono)
     {
+        for (int indice = 0; indice < poligono.Count; indice++)
+        {
+            Point2d inicio = poligono[indice];
+            Point2d fim = poligono[(indice + 1) % poligono.Count];
+
+            if (PontoSobreSegmento(ponto, inicio, fim))
+                return true;
+        }
+
         bool dentro = false;
         int j = poligono.Count - 1;
 
@@ -277,6 +404,29 @@ public static class TerraplenagemFeatureLineService
     }
 
     /// <summary>
+    /// Verifica se um ponto esta sobre uma aresta do poligono.
+    /// </summary>
+    private static bool PontoSobreSegmento(Point2d ponto, Point2d inicio, Point2d fim)
+    {
+        double areaDobrada =
+            ((fim.X - inicio.X) * (ponto.Y - inicio.Y))
+            - ((fim.Y - inicio.Y) * (ponto.X - inicio.X));
+
+        if (Math.Abs(areaDobrada) > ToleranciaBordaPoligono)
+            return false;
+
+        double minX = Math.Min(inicio.X, fim.X) - ToleranciaBordaPoligono;
+        double maxX = Math.Max(inicio.X, fim.X) + ToleranciaBordaPoligono;
+        double minY = Math.Min(inicio.Y, fim.Y) - ToleranciaBordaPoligono;
+        double maxY = Math.Max(inicio.Y, fim.Y) + ToleranciaBordaPoligono;
+
+        return ponto.X >= minX
+            && ponto.X <= maxX
+            && ponto.Y >= minY
+            && ponto.Y <= maxY;
+    }
+
+    /// <summary>
     /// Reproduz o ajuste iterativo de deflexao do primeiro script Python.
     /// </summary>
     private static bool AjustarDeflexao(
@@ -293,7 +443,7 @@ public static class TerraplenagemFeatureLineService
 
             if (quantidadePontosPi < 3)
             {
-                logs.Add($"'{featureLine.Name}': menos de 3 PI points, etapa de deflexao ignorada.");
+                logs.Add($"'{featureLine.Name}': falha geometrica na etapa de deflexao, a feature line possui menos de 3 PI points.");
                 break;
             }
 
@@ -313,61 +463,77 @@ public static class TerraplenagemFeatureLineService
 
             foreach (int indicePi in indices)
             {
-                bool pontoDentroDoLimite = false;
+                ResultadoEtapa resultadoPonto = ProcessarPontoDeflexao(
+                    featureLine,
+                    indicePi,
+                    request,
+                    ref houveAlteracao);
 
-                for (int tentativaLocal = 1; tentativaLocal <= request.NumeroTentativasPorPonto; tentativaLocal++)
+                if (resultadoPonto.Tipo == TipoResultadoEtapa.AjusteConcluido)
                 {
-                    pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
-
-                    Point3d pontoAnterior = pontosPi[indicePi - 1];
-                    Point3d pontoAtual = pontosPi[indicePi];
-                    Point3d pontoPosterior = pontosPi[indicePi + 1];
-
-                    double comprimentoAnterior = Distancia2d(pontoAnterior, pontoAtual);
-                    double comprimentoPosterior = Distancia2d(pontoAtual, pontoPosterior);
-
-                    if (comprimentoAnterior <= ToleranciaComparacaoXY || comprimentoPosterior <= ToleranciaComparacaoXY)
-                    {
-                        logs.Add($"'{featureLine.Name}': PI {indicePi} ignorado por comprimento 2D nulo.");
-                        break;
-                    }
-
-                    double deflexao =
-                        (pontoAtual.Z - pontoAnterior.Z) / comprimentoAnterior
-                        - (pontoPosterior.Z - pontoAtual.Z) / comprimentoPosterior;
-
-                    if (Math.Abs(deflexao) <= request.DeflexaoLimite)
-                    {
-                        pontosOk++;
-                        pontoDentroDoLimite = true;
-                        break;
-                    }
-
-                    double sinalAjuste = deflexao > 0 ? -1 : 1;
-                    double novaElevacao = pontoAtual.Z + (sinalAjuste * request.PassoIncrementalAjusteCota);
-
-                    if (!SetPiPointElevation(featureLine, indicePi, novaElevacao))
-                    {
-                        logs.Add($"'{featureLine.Name}': falha ao ajustar o PI {indicePi} na etapa de deflexao.");
-                        break;
-                    }
-
-                    houveAlteracao = true;
+                    pontosOk++;
+                    continue;
                 }
 
-                if (!pontoDentroDoLimite)
-                    logs.Add($"'{featureLine.Name}': PI {indicePi} nao convergiu na etapa de deflexao.");
+                logs.Add($"'{featureLine.Name}': PI {indicePi} - {resultadoPonto.Mensagem}");
             }
 
             double percentualOk = totalPontos == 0 ? 1 : (double)pontosOk / totalPontos;
             logs.Add(
-                $"'{featureLine.Name}': passada {passadaGlobal}, pontos OK = {pontosOk}/{totalPontos}, percentual = {percentualOk.ToString("P2", CultureInfo.InvariantCulture)}.");
+                $"'{featureLine.Name}': passada {passadaGlobal}, pontos dentro do limite = {pontosOk}/{totalPontos}, percentual = {percentualOk.ToString("P2", CultureInfo.InvariantCulture)}.");
 
             if (percentualOk >= request.PercentualObjetivo)
                 break;
         }
 
         return houveAlteracao;
+    }
+
+    /// <summary>
+    /// Processa um unico PI point na etapa de deflexao.
+    /// </summary>
+    private static ResultadoEtapa ProcessarPontoDeflexao(
+        FeatureLine featureLine,
+        int indicePi,
+        TerraplenagemFeatureLinesRequest request,
+        ref bool houveAlteracao)
+    {
+        for (int tentativaLocal = 1; tentativaLocal <= request.NumeroTentativasPorPonto; tentativaLocal++)
+        {
+            Point3dCollection pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
+
+            Point3d pontoAnterior = pontosPi[indicePi - 1];
+            Point3d pontoAtual = pontosPi[indicePi];
+            Point3d pontoPosterior = pontosPi[indicePi + 1];
+
+            double comprimentoAnterior = Distancia2d(pontoAnterior, pontoAtual);
+            double comprimentoPosterior = Distancia2d(pontoAtual, pontoPosterior);
+
+            if (comprimentoAnterior <= ToleranciaMapeamentoXY || comprimentoPosterior <= ToleranciaMapeamentoXY)
+            {
+                return ResultadoEtapa.FalhaGeometrica(
+                    "falha geometrica na etapa de deflexao: um dos segmentos adjacentes possui comprimento 2D nulo.");
+            }
+
+            double deflexao =
+                (pontoAtual.Z - pontoAnterior.Z) / comprimentoAnterior
+                - (pontoPosterior.Z - pontoAtual.Z) / comprimentoPosterior;
+
+            if (Math.Abs(deflexao) <= request.DeflexaoLimite)
+                return ResultadoEtapa.AjusteConcluido("ajuste concluido na etapa de deflexao.");
+
+            double sinalAjuste = deflexao > 0 ? -1 : 1;
+            double novaElevacao = pontoAtual.Z + (sinalAjuste * request.PassoIncrementalAjusteCota);
+
+            ResultadoAjustePonto resultadoAjuste = SetPiPointElevation(featureLine, indicePi, novaElevacao);
+            if (!resultadoAjuste.Sucesso)
+                return ResultadoEtapa.DaFalha(resultadoAjuste.TipoFalha, resultadoAjuste.Mensagem);
+
+            houveAlteracao = true;
+        }
+
+        return ResultadoEtapa.NaoConvergiu(
+            $"nao convergiu na etapa de deflexao apos {request.NumeroTentativasPorPonto} tentativas.");
     }
 
     /// <summary>
@@ -389,7 +555,7 @@ public static class TerraplenagemFeatureLineService
 
             if (quantidadePontosPi < 2)
             {
-                logs.Add($"'{featureLine.Name}': menos de 2 PI points, etapa de superficie ignorada.");
+                logs.Add($"'{featureLine.Name}': falha geometrica na etapa de superficie, a feature line possui menos de 2 PI points.");
                 break;
             }
 
@@ -399,107 +565,27 @@ public static class TerraplenagemFeatureLineService
             if (ultimoIndiceSegmento < 0)
                 break;
 
-            (int Inicio, int Fim)? segmentoCritico = null;
-            double deltaCritico = 0;
-            double moduloMaximo = 0;
-
-            for (int indiceSegmento = 0; indiceSegmento <= ultimoIndiceSegmento; indiceSegmento++)
+            if (!TentarEncontrarSegmentoCritico(
+                    pontosPi,
+                    superficieBase,
+                    request.ToleranciaAltaSuperficie,
+                    ultimoIndiceSegmento,
+                    out SegmentoCritico segmentoCritico))
             {
-                Point3d pontoInicial = pontosPi[indiceSegmento];
-                Point3d pontoFinal = pontosPi[indiceSegmento + 1];
-
-                if (!TentarObterDeltaMeioSegmento(pontoInicial, pontoFinal, superficieBase, out double deltaMeio))
-                    continue;
-
-                double moduloAtual = Math.Abs(deltaMeio);
-                if (moduloAtual > request.ToleranciaAltaSuperficie && moduloAtual > moduloMaximo)
-                {
-                    moduloMaximo = moduloAtual;
-                    deltaCritico = deltaMeio;
-                    segmentoCritico = (indiceSegmento, indiceSegmento + 1);
-                }
-            }
-
-            if (segmentoCritico == null)
-            {
-                logs.Add($"'{featureLine.Name}': nenhum segmento fora da tolerancia de superficie.");
+                logs.Add($"'{featureLine.Name}': nenhum segmento ficou fora da tolerancia da superficie.");
                 break;
             }
 
-            int indiceInicio = segmentoCritico.Value.Inicio;
-            int indiceFim = segmentoCritico.Value.Fim;
-
-            double? deltaPiInicial = ObterDeltaPonto(pontosPi[indiceInicio], superficieBase);
-            double? deltaPiFinal = ObterDeltaPonto(pontosPi[indiceFim], superficieBase);
-            IReadOnlyList<int> indicesAjuste = EscolherIndicesAjuste(
-                indiceInicio,
-                indiceFim,
-                deltaPiInicial,
-                deltaPiFinal,
-                request.ToleranciaBaixaSuperficie);
-
-            double? deltaMeioAnterior = null;
-            int estagnado = 0;
-
-            for (int tentativaLocal = 1; tentativaLocal <= request.NumeroTentativasPorPonto; tentativaLocal++)
-            {
-                pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
-
-                if (!TentarObterDeltaMeioSegmento(pontosPi[indiceInicio], pontosPi[indiceFim], superficieBase, out double deltaMeioAtual))
-                {
-                    logs.Add($"'{featureLine.Name}': meio do segmento critico saiu da superficie.");
-                    break;
-                }
-
-                if (Math.Abs(deltaMeioAtual) <= request.ToleranciaAltaSuperficie)
-                {
-                    logs.Add(
-                        $"'{featureLine.Name}': segmento {indiceInicio}-{indiceFim} entrou na tolerancia de superficie.");
-                    break;
-                }
-
-                double deltaElevacao = deltaMeioAtual > 0
-                    ? -request.PassoIncrementalAjusteCota
-                    : request.PassoIncrementalAjusteCota;
-
-                foreach (int indicePi in indicesAjuste)
-                {
-                    pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
-                    double novaElevacao = pontosPi[indicePi].Z + deltaElevacao;
-
-                    if (!SetPiPointElevation(featureLine, indicePi, novaElevacao))
-                    {
-                        logs.Add($"'{featureLine.Name}': falha ao ajustar o PI {indicePi} na etapa de superficie.");
-                        break;
-                    }
-
-                    houveAlteracao = true;
-                }
-
-                pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
-                if (!TentarObterDeltaMeioSegmento(pontosPi[indiceInicio], pontosPi[indiceFim], superficieBase, out double deltaMeioNovo))
-                    break;
-
-                if (deltaMeioAnterior.HasValue)
-                {
-                    if (Math.Abs(deltaMeioNovo - deltaMeioAnterior.Value) < 1e-12)
-                        estagnado++;
-                    else
-                        estagnado = 0;
-                }
-
-                deltaMeioAnterior = deltaMeioNovo;
-
-                if (estagnado >= 5)
-                {
-                    logs.Add($"'{featureLine.Name}': estagnacao detectada no segmento {indiceInicio}-{indiceFim}.");
-                    break;
-                }
-            }
+            ResultadoEtapa resultadoSegmento = ProcessarSegmentoCritico(
+                featureLine,
+                superficieBase,
+                request,
+                segmentoCritico,
+                ref houveAlteracao);
 
             ajustesFeitos++;
             logs.Add(
-                $"'{featureLine.Name}': ajuste por superficie concluido no segmento {indiceInicio}-{indiceFim}, delta inicial = {deltaCritico.ToString("F4", CultureInfo.InvariantCulture)}.");
+                $"'{featureLine.Name}': segmento {segmentoCritico.IndiceInicio}-{segmentoCritico.IndiceFim} - {resultadoSegmento.Mensagem}");
 
             // O script Dynamo faz apenas um ajuste critico por execucao
             // para reavaliar a feature line completa na proxima rodada.
@@ -507,6 +593,130 @@ public static class TerraplenagemFeatureLineService
         }
 
         return houveAlteracao;
+    }
+
+    /// <summary>
+    /// Procura o segmento cujo ponto medio esta mais distante da superficie.
+    /// </summary>
+    private static bool TentarEncontrarSegmentoCritico(
+        Point3dCollection pontosPi,
+        TinSurface superficieBase,
+        double toleranciaAlta,
+        int ultimoIndiceSegmento,
+        out SegmentoCritico segmentoCritico)
+    {
+        segmentoCritico = default;
+        double moduloMaximo = 0;
+
+        for (int indiceSegmento = 0; indiceSegmento <= ultimoIndiceSegmento; indiceSegmento++)
+        {
+            Point3d pontoInicial = pontosPi[indiceSegmento];
+            Point3d pontoFinal = pontosPi[indiceSegmento + 1];
+
+            if (!TentarObterDeltaMeioSegmento(pontoInicial, pontoFinal, superficieBase, out double deltaMeio))
+                continue;
+
+            double moduloAtual = Math.Abs(deltaMeio);
+            if (moduloAtual <= toleranciaAlta || moduloAtual <= moduloMaximo)
+                continue;
+
+            moduloMaximo = moduloAtual;
+            segmentoCritico = new SegmentoCritico(indiceSegmento, indiceSegmento + 1, deltaMeio);
+        }
+
+        return moduloMaximo > 0;
+    }
+
+    /// <summary>
+    /// Processa o segmento critico escolhido na etapa de comparacao com a superficie.
+    /// </summary>
+    private static ResultadoEtapa ProcessarSegmentoCritico(
+        FeatureLine featureLine,
+        TinSurface superficieBase,
+        TerraplenagemFeatureLinesRequest request,
+        SegmentoCritico segmentoCritico,
+        ref bool houveAlteracao)
+    {
+        Point3dCollection pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
+
+        double? deltaPiInicial = ObterDeltaPonto(pontosPi[segmentoCritico.IndiceInicio], superficieBase);
+        double? deltaPiFinal = ObterDeltaPonto(pontosPi[segmentoCritico.IndiceFim], superficieBase);
+        IReadOnlyList<int> indicesAjuste = EscolherIndicesAjuste(
+            segmentoCritico.IndiceInicio,
+            segmentoCritico.IndiceFim,
+            deltaPiInicial,
+            deltaPiFinal,
+            request.ToleranciaBaixaSuperficie);
+
+        double? deltaMeioAnterior = null;
+        int estagnado = 0;
+
+        for (int tentativaLocal = 1; tentativaLocal <= request.NumeroTentativasPorPonto; tentativaLocal++)
+        {
+            pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
+
+            if (!TentarObterDeltaMeioSegmento(
+                    pontosPi[segmentoCritico.IndiceInicio],
+                    pontosPi[segmentoCritico.IndiceFim],
+                    superficieBase,
+                    out double deltaMeioAtual))
+            {
+                return ResultadoEtapa.FalhaGeometrica(
+                    "falha geometrica na etapa de superficie: o ponto medio do segmento saiu da superficie base.");
+            }
+
+            if (Math.Abs(deltaMeioAtual) <= request.ToleranciaAltaSuperficie)
+            {
+                return ResultadoEtapa.AjusteConcluido(
+                    $"ajuste concluido na etapa de superficie; delta inicial = {segmentoCritico.DeltaInicial.ToString("F4", CultureInfo.InvariantCulture)}.");
+            }
+
+            double deltaElevacao = deltaMeioAtual > 0
+                ? -request.PassoIncrementalAjusteCota
+                : request.PassoIncrementalAjusteCota;
+
+            foreach (int indicePi in indicesAjuste)
+            {
+                pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
+                double novaElevacao = pontosPi[indicePi].Z + deltaElevacao;
+
+                ResultadoAjustePonto resultadoAjuste = SetPiPointElevation(featureLine, indicePi, novaElevacao);
+                if (!resultadoAjuste.Sucesso)
+                    return ResultadoEtapa.DaFalha(resultadoAjuste.TipoFalha, resultadoAjuste.Mensagem);
+
+                houveAlteracao = true;
+            }
+
+            pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
+            if (!TentarObterDeltaMeioSegmento(
+                    pontosPi[segmentoCritico.IndiceInicio],
+                    pontosPi[segmentoCritico.IndiceFim],
+                    superficieBase,
+                    out double deltaMeioNovo))
+            {
+                return ResultadoEtapa.FalhaGeometrica(
+                    "falha geometrica na etapa de superficie: nao foi possivel recalcular o ponto medio do segmento apos o ajuste.");
+            }
+
+            if (deltaMeioAnterior.HasValue)
+            {
+                if (Math.Abs(deltaMeioNovo - deltaMeioAnterior.Value) < 1e-12)
+                    estagnado++;
+                else
+                    estagnado = 0;
+            }
+
+            deltaMeioAnterior = deltaMeioNovo;
+
+            if (estagnado >= 5)
+            {
+                return ResultadoEtapa.NaoConvergiu(
+                    $"nao convergiu na etapa de superficie: estagnacao detectada apos {tentativaLocal} tentativas.");
+            }
+        }
+
+        return ResultadoEtapa.NaoConvergiu(
+            $"nao convergiu na etapa de superficie apos {request.NumeroTentativasPorPonto} tentativas.");
     }
 
     /// <summary>
@@ -593,33 +803,61 @@ public static class TerraplenagemFeatureLineService
     }
 
     /// <summary>
-    /// Ajusta a elevacao de um PI point convertendo o indice de PI para o indice de all points.
+    /// Ajusta a elevacao de um PI point convertendo o indice de PI para o indice de AllPoints.
+    /// O ajuste falha explicitamente quando o mapeamento nao e confiavel.
     /// </summary>
-    private static bool SetPiPointElevation(FeatureLine featureLine, int indicePi, double novaElevacao)
+    private static ResultadoAjustePonto SetPiPointElevation(
+        FeatureLine featureLine,
+        int indicePi,
+        double novaElevacao)
     {
         Point3dCollection pontosPi = featureLine.GetPoints(FeatureLinePointType.PIPoint);
         Point3dCollection todosOsPontos = featureLine.GetPoints(FeatureLinePointType.AllPoints);
 
         if (indicePi < 0 || indicePi >= pontosPi.Count)
-            return false;
+        {
+            return ResultadoAjustePonto.Falha(
+                TipoResultadoEtapa.FalhaMapeamento,
+                "falha de mapeamento: o indice do PI point esta fora do intervalo esperado.");
+        }
 
         Point3d pontoPi = pontosPi[indicePi];
-        int indiceAllPoints = LocalizarIndiceAllPoints(todosOsPontos, pontoPi);
+        // O ajuste sempre acontece em AllPoints porque e esse indice que o Civil 3D aceita no SetPointElevation.
+        if (!TryLocalizarIndiceAllPoints(
+                todosOsPontos,
+                pontoPi,
+                out int indiceAllPoints,
+                out string mensagemMapeamento))
+        {
+            return ResultadoAjustePonto.Falha(
+                TipoResultadoEtapa.FalhaMapeamento,
+                mensagemMapeamento);
+        }
 
-        if (indiceAllPoints < 0)
-            return false;
-
-        featureLine.SetPointElevation(indiceAllPoints, novaElevacao);
-        return true;
+        try
+        {
+            featureLine.SetPointElevation(indiceAllPoints, novaElevacao);
+            return ResultadoAjustePonto.ComSucesso();
+        }
+        catch (System.Exception ex)
+        {
+            return ResultadoAjustePonto.Falha(
+                TipoResultadoEtapa.FalhaGeometrica,
+                $"falha geometrica ao aplicar a nova elevacao: {ex.Message}");
+        }
     }
 
     /// <summary>
-    /// Procura o indice do ponto equivalente dentro da colecao AllPoints.
+    /// Localiza o indice correspondente do PI point em AllPoints apenas quando a correspondencia e confiavel.
     /// </summary>
-    private static int LocalizarIndiceAllPoints(Point3dCollection todosOsPontos, Point3d pontoPi)
+    private static bool TryLocalizarIndiceAllPoints(
+        Point3dCollection todosOsPontos,
+        Point3d pontoPi,
+        out int indiceAllPoints,
+        out string mensagem)
     {
-        int indiceMaisProximo = -1;
-        double menorDistancia = double.MaxValue;
+        indiceAllPoints = -1;
+        mensagem = string.Empty;
 
         for (int indice = 0; indice < todosOsPontos.Count; indice++)
         {
@@ -629,16 +867,100 @@ public static class TerraplenagemFeatureLineService
                     Math.Pow(pontoAtual.X - pontoPi.X, 2)
                     + Math.Pow(pontoAtual.Y - pontoPi.Y, 2));
 
-            if (distancia < menorDistancia)
-            {
-                menorDistancia = distancia;
-                indiceMaisProximo = indice;
-            }
+            if (distancia > ToleranciaMapeamentoXY)
+                continue;
 
-            if (distancia <= ToleranciaComparacaoXY)
-                return indice;
+            indiceAllPoints = indice;
+            return true;
         }
 
-        return indiceMaisProximo;
+        mensagem =
+            $"falha de mapeamento: nao foi possivel mapear o PI para AllPoints dentro da tolerancia XY de {ToleranciaMapeamentoXY.ToString("G", CultureInfo.InvariantCulture)}.";
+        return false;
+    }
+
+    /// <summary>
+    /// Estrutura imutavel com os dados preparados antes da escrita.
+    /// </summary>
+    private sealed record PreparacaoTerraplenagem(
+        ObjectId IdSuperficieBase,
+        int TotalFeatureLinesNoSite,
+        List<ObjectId> IdsFeatureLinesFiltradas);
+
+    /// <summary>
+    /// Estrutura usada para representar um poligono de filtro encontrado na layer.
+    /// </summary>
+    private sealed record CandidatoPoligono(
+        string Tipo,
+        string Handle,
+        List<Point2d> Vertices);
+
+    /// <summary>
+    /// Estrutura simples para devolver o resultado da selecao do poligono.
+    /// </summary>
+    private sealed record ResultadoSelecaoPoligono(
+        bool Sucesso,
+        string Mensagem,
+        List<Point2d> Vertices)
+    {
+        public static ResultadoSelecaoPoligono Falha(string mensagem) =>
+            new(false, mensagem, new List<Point2d>());
+
+        public static ResultadoSelecaoPoligono SucessoCom(List<Point2d> vertices) =>
+            new(true, string.Empty, vertices);
+    }
+
+    /// <summary>
+    /// Estrutura que representa o segmento mais critico na etapa de superficie.
+    /// </summary>
+    private readonly record struct SegmentoCritico(
+        int IndiceInicio,
+        int IndiceFim,
+        double DeltaInicial);
+
+    /// <summary>
+    /// Estrutura padronizada para retorno das etapas internas.
+    /// </summary>
+    private readonly record struct ResultadoEtapa(
+        TipoResultadoEtapa Tipo,
+        string Mensagem)
+    {
+        public static ResultadoEtapa AjusteConcluido(string mensagem) =>
+            new(TipoResultadoEtapa.AjusteConcluido, mensagem);
+
+        public static ResultadoEtapa FalhaGeometrica(string mensagem) =>
+            new(TipoResultadoEtapa.FalhaGeometrica, mensagem);
+
+        public static ResultadoEtapa NaoConvergiu(string mensagem) =>
+            new(TipoResultadoEtapa.NaoConvergiu, mensagem);
+
+        public static ResultadoEtapa DaFalha(TipoResultadoEtapa tipo, string mensagem) =>
+            new(tipo, mensagem);
+    }
+
+    /// <summary>
+    /// Estrutura de retorno do ajuste de um unico ponto.
+    /// </summary>
+    private readonly record struct ResultadoAjustePonto(
+        bool Sucesso,
+        TipoResultadoEtapa TipoFalha,
+        string Mensagem)
+    {
+        public static ResultadoAjustePonto ComSucesso() =>
+            new(true, TipoResultadoEtapa.AjusteConcluido, string.Empty);
+
+        public static ResultadoAjustePonto Falha(TipoResultadoEtapa tipoFalha, string mensagem) =>
+            new(false, tipoFalha, mensagem);
+    }
+
+    /// <summary>
+    /// Categoria usada para separar sucesso, falhas e nao convergencia nos logs.
+    /// </summary>
+    private enum TipoResultadoEtapa
+    {
+        AjusteConcluido,
+        FalhaGeometrica,
+        FalhaMapeamento,
+        NaoConvergiu
     }
 }
