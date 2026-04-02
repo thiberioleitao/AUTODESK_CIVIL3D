@@ -5,20 +5,16 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.Civil.ApplicationServices;
 using Autodesk.Civil.DatabaseServices;
+using Autodesk.Civil.DatabaseServices.Styles;
 using ZagoCivil3D.Models;
 using ZagoCivil3D.Services;
 using ZagoCivil3D.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace ZagoCivil3D.Commands
 {
-    /// <summary>
-    /// Comando principal que orquestra: coleta de parâmetros, execução do serviço
-    /// e apresentação do resumo ao usuário na linha de comando.
-    /// </summary>
     public class CriarAlinhamentosCommand
     {
         [CommandMethod("ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA")]
@@ -89,8 +85,6 @@ namespace ZagoCivil3D.Commands
             if (resultadoDialogo != true)
                 return null;
 
-            // A UI atualmente trabalha com uma única layer de origem/destino.
-            // Mantemos o mesmo valor para preservar comportamento previsível.
             return new CriarAlinhamentosRequest
             {
                 Prefixo = tela.Prefixo,
@@ -127,22 +121,26 @@ namespace ZagoCivil3D.Commands
             var nomes = new List<string>();
 
             using Transaction transacao = db.TransactionManager.StartTransaction();
-            foreach (ObjectId idEstilo in civilDoc.Styles.AlignmentStyles)
+
+            foreach (ObjectId id in civilDoc.Styles.AlignmentStyles)
             {
-                Autodesk.AutoCAD.DatabaseServices.DBObject estilo = transacao.GetObject(idEstilo, OpenMode.ForRead);
-                string? nomeEstilo = ObterNomeObjeto(estilo);
-                if (!string.IsNullOrWhiteSpace(nomeEstilo))
-                    nomes.Add(nomeEstilo);
+                if (id.IsNull || id.IsErased)
+                    continue;
+
+                try
+                {
+                    if (transacao.GetObject(id, OpenMode.ForRead) is AlignmentStyle estilo &&
+                        !string.IsNullOrWhiteSpace(estilo.Name))
+                    {
+                        nomes.Add(estilo.Name);
+                    }
+                }
+                catch
+                {
+                }
             }
 
             transacao.Commit();
-            if (nomes.Count == 0)
-            {
-                nomes.AddRange(civilDoc.Styles.AlignmentStyles
-                    .Cast<ObjectId>()
-                    .Select(x => x.ToString()));
-            }
-
             return nomes.Distinct().OrderBy(x => x).ToList();
         }
 
@@ -151,36 +149,27 @@ namespace ZagoCivil3D.Commands
             var nomes = new List<string>();
 
             using Transaction transacao = db.TransactionManager.StartTransaction();
-            foreach (ObjectId idConjunto in civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles)
+
+            foreach (ObjectId id in civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles)
             {
-                Autodesk.AutoCAD.DatabaseServices.DBObject conjunto = transacao.GetObject(idConjunto, OpenMode.ForRead);
-                string? nomeConjunto = ObterNomeObjeto(conjunto);
-                if (!string.IsNullOrWhiteSpace(nomeConjunto))
-                    nomes.Add(nomeConjunto);
+                if (id.IsNull || id.IsErased)
+                    continue;
+
+                try
+                {
+                    if (transacao.GetObject(id, OpenMode.ForRead) is AlignmentLabelSetStyle conjunto &&
+                        !string.IsNullOrWhiteSpace(conjunto.Name))
+                    {
+                        nomes.Add(conjunto.Name);
+                    }
+                }
+                catch
+                {
+                }
             }
 
             transacao.Commit();
-            if (nomes.Count == 0)
-            {
-                nomes.AddRange(civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles
-                    .Cast<ObjectId>()
-                    .Select(x => x.ToString()));
-            }
-
             return nomes.Distinct().OrderBy(x => x).ToList();
-        }
-
-        private static string? ObterNomeObjeto(Autodesk.AutoCAD.DatabaseServices.DBObject objeto)
-        {
-            PropertyInfo? propriedadeNome = objeto
-                .GetType()
-                .GetProperty("Name", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-            MethodInfo? metodoGet = propriedadeNome?.GetGetMethod(true);
-            if (metodoGet == null || metodoGet.GetParameters().Length != 0)
-                return null;
-
-            return metodoGet.Invoke(objeto, null)?.ToString();
         }
     }
 }

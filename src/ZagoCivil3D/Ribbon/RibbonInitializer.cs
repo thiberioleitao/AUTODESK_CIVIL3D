@@ -4,6 +4,9 @@ using Autodesk.Windows;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace ZagoCivil3D.Ribbon
 {
@@ -98,39 +101,39 @@ namespace ZagoCivil3D.Ribbon
 
                 RibbonTab abaDrenagem = ObterOuCriarAba(ribbon, m_tabDrenagemId, "ZAGO - DRENAGEM");
                 RibbonPanelSource painelCriarAlinhamentos = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarAlinhamentosId, "CRIAR - ALINHAMENTOS");
-                AdicionarBotaoComando(painelCriarAlinhamentos, "ZAGO_CRIAR_ALINH_POR_POLI", "Alinhamentos\npor Polilinha", "ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA ");
-                AdicionarBotaoGrande(painelCriarAlinhamentos, "ZAGO_CRIAR_PONTOS_CRUZ", "Pontos nos\nCruzamentos", "CRIAR - ALINHAMENTOS > PONTOS NOS CRUZAMENTOS ENTRE ALINHAMENTOS");
+                AdicionarBotaoComando(painelCriarAlinhamentos, "ZAGO_CRIAR_ALINH_POR_POLI", "Alinhamentos\npor Polilinha", "ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA ", "AL");
+                AdicionarBotaoGrande(painelCriarAlinhamentos, "ZAGO_CRIAR_PONTOS_CRUZ", "Pontos nos\nCruzamentos", "CRIAR - ALINHAMENTOS > PONTOS NOS CRUZAMENTOS ENTRE ALINHAMENTOS", "PX");
 
                 RibbonPanelSource painelCriarPerfis = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarPerfisId, "CRIAR - PERFIS");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "CRIAR - PERFIS > PERFIS DE PROJETO A PARTIR DE ALINHAMENTOS");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_TN", "Perfis TN e\nTerraplenagem", "CRIAR - PERFIS > PERFIS DO TERRENO NATURAL E TERRAPLENAGEM");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PROFILE_VIEW", "Profile\nView", "CRIAR - PERFIS > PROFILE VIEW");
+                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "CRIAR - PERFIS > PERFIS DE PROJETO A PARTIR DE ALINHAMENTOS", "PP");
+                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_TN", "Perfis TN e\nTerraplenagem", "CRIAR - PERFIS > PERFIS DO TERRENO NATURAL E TERRAPLENAGEM", "TN");
+                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PROFILE_VIEW", "Profile\nView", "CRIAR - PERFIS > PROFILE VIEW", "PV");
 
                 RibbonPanelSource painelCriarCorredores = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCorredoresId, "CRIAR - CORREDORES");
-                AdicionarBotaoGrande(painelCriarCorredores, "ZAGO_CRIAR_CORREDORES", "Criar\nCorredores", "CRIAR - CORREDORES > FUNCOES DE CRIACAO DE CORREDORES");
+                AdicionarBotaoGrande(painelCriarCorredores, "ZAGO_CRIAR_CORREDORES", "Criar\nCorredores", "CRIAR - CORREDORES > FUNCOES DE CRIACAO DE CORREDORES", "CO");
 
                 RibbonPanelSource painelCriarRegioes = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarRegioesId, "CRIAR - REGIOES");
-                AdicionarBotaoGrande(painelCriarRegioes, "ZAGO_CRIAR_REGIOES", "Criar\nRegioes", "CRIAR - REGIOES > FUNCOES DE CRIACAO DE REGIOES");
+                AdicionarBotaoGrande(painelCriarRegioes, "ZAGO_CRIAR_REGIOES", "Criar\nRegioes", "CRIAR - REGIOES > FUNCOES DE CRIACAO DE REGIOES", "RG");
 
                 RibbonPanelSource painelCriarCaixas = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCaixasId, "CRIAR - CAIXAS");
-                AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS");
+                AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS", "CX");
 
                 RibbonPanelSource painelExportar = ObterOuCriarPainelFonte(abaDrenagem, m_panelExportarId, "EXPORTAR");
-                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_BACIAS", "CSV Bacias e\nSubbacias", "EXPORTAR > CSV BACIAS/SUBBACIAS (ID, AREA, TALVEGUE, DECLIVIDADE, ID_JUSANTE)");
-                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_CANAIS", "CSV Canais\ne Bueiros", "EXPORTAR > CSV CANAIS E BUEIROS");
+                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_BACIAS", "CSV Bacias e\nSubbacias", "EXPORTAR > CSV BACIAS/SUBBACIAS (ID, AREA, TALVEGUE, DECLIVIDADE, ID_JUSANTE)", "SB");
+                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_CANAIS", "CSV Canais\ne Bueiros", "EXPORTAR > CSV CANAIS E BUEIROS", "CE");
 
                 RibbonPanelSource painelModificar = ObterOuCriarPainelFonte(abaDrenagem, m_panelModificarId, "MODIFICAR");
-                AdicionarBotaoGrande(painelModificar, "ZAGO_MODIFICAR_DUMMY", "Modificar\n(Dummy)", "MODIFICAR > FUNCOES EM DEFINICAO");
+                AdicionarBotaoGrande(painelModificar, "ZAGO_MODIFICAR_DUMMY", "Modificar\n(Dummy)", "MODIFICAR > FUNCOES EM DEFINICAO", "MD");
 
                 RibbonPanelSource painelAnotar = ObterOuCriarPainelFonte(abaDrenagem, m_panelAnotarId, "ANOTAR");
-                AdicionarBotaoGrande(painelAnotar, "ZAGO_ANOTAR_LABELS_CORR", "Labels\nCorredores", "ANOTAR > ADICIONAR LABELS DOS TRECHOS/REGIOES DOS CORREDORES EM PLANTA");
+                AdicionarBotaoGrande(painelAnotar, "ZAGO_ANOTAR_LABELS_CORR", "Labels\nCorredores", "ANOTAR > ADICIONAR LABELS DOS TRECHOS/REGIOES DOS CORREDORES EM PLANTA", "LB");
 
                 RibbonPanelSource painelDeletar = ObterOuCriarPainelFonte(abaDrenagem, m_panelDeletarId, "DELETAR");
-                AdicionarBotaoGrande(painelDeletar, "ZAGO_DELETAR_DUMMY", "Deletar\n(Dummy)", "DELETAR > FUNCOES EM DEFINICAO");
+                AdicionarBotaoGrande(painelDeletar, "ZAGO_DELETAR_DUMMY", "Deletar\n(Dummy)", "DELETAR > FUNCOES EM DEFINICAO", "DL");
 
                 RibbonTab abaTerraplenagem = ObterOuCriarAba(ribbon, m_tabTerraplenagemId, "ZAGO - TERRAPLENAGEM");
                 RibbonPanelSource painelDummyTerraplenagem = ObterOuCriarPainelFonte(abaTerraplenagem, m_panelDummyId, "BOTÃO DUMMY");
-                AdicionarBotaoGrande(painelDummyTerraplenagem, "ZAGO_TERRAPL_DUMMY", "Botão\nDummy", "TERRAPLENAGEM > BOTAO DUMMY");
+                AdicionarBotaoGrande(painelDummyTerraplenagem, "ZAGO_TERRAPL_DUMMY", "Botão\nDummy", "TERRAPLENAGEM > BOTAO DUMMY", "TP");
 
                 ribbon.ActiveTab = abaDrenagem;
 
@@ -188,25 +191,28 @@ namespace ZagoCivil3D.Ribbon
             RibbonPanelSource fontePainel,
             string idBotao,
             string textoBotao,
-            string mensagemDummy)
+            string mensagemDummy,
+            string siglaIcone)
         {
-            AdicionarBotao(fontePainel, idBotao, textoBotao, m_prefixoComandoDummy + mensagemDummy);
+            AdicionarBotao(fontePainel, idBotao, textoBotao, m_prefixoComandoDummy + mensagemDummy, siglaIcone);
         }
 
         private static void AdicionarBotaoComando(
             RibbonPanelSource fontePainel,
             string idBotao,
             string textoBotao,
-            string nomeComando)
+            string nomeComando,
+            string siglaIcone)
         {
-            AdicionarBotao(fontePainel, idBotao, textoBotao, nomeComando);
+            AdicionarBotao(fontePainel, idBotao, textoBotao, nomeComando, siglaIcone);
         }
 
         private static void AdicionarBotao(
             RibbonPanelSource fontePainel,
             string idBotao,
             string textoBotao,
-            string parametroComando)
+            string parametroComando,
+            string siglaIcone)
         {
             bool botaoExiste = fontePainel.Items
                 .OfType<RibbonButton>()
@@ -222,11 +228,75 @@ namespace ZagoCivil3D.Ribbon
                 ShowText = true,
                 Size = RibbonItemSize.Large,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
+                LargeImage = CriarIcone(siglaIcone),
                 CommandParameter = parametroComando,
                 CommandHandler = new ManipuladorComandoRibbon()
             };
 
             fontePainel.Items.Add(botao);
+        }
+
+        private static ImageSource CriarIcone(string sigla)
+        {
+            const int largura = 32;
+            const int altura = 32;
+
+            var visual = new DrawingVisual();
+            using DrawingContext contexto = visual.RenderOpen();
+
+            Color corFundo = ObterCorIcone(sigla);
+            var retangulo = new Rect(0, 0, largura, altura);
+            var pincelFundo = new SolidColorBrush(corFundo);
+            pincelFundo.Freeze();
+
+            var pincelBorda = new SolidColorBrush(Color.FromRgb(33, 37, 43));
+            pincelBorda.Freeze();
+
+            contexto.DrawRoundedRectangle(pincelFundo, new Pen(pincelBorda, 1), retangulo, 6, 6);
+
+            double pixelsPorDip = VisualTreeHelper.GetDpi(visual).PixelsPerDip;
+            var texto = new FormattedText(
+                sigla,
+                System.Globalization.CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                new Typeface(new FontFamily("Segoe UI Semibold"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal),
+                12,
+                Brushes.White,
+                pixelsPorDip);
+
+            Point pontoTexto = new(
+                (largura - texto.Width) / 2,
+                (altura - texto.Height) / 2 - 1);
+
+            contexto.DrawText(texto, pontoTexto);
+
+            var bitmap = new RenderTargetBitmap(largura, altura, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            bitmap.Freeze();
+
+            return bitmap;
+        }
+
+        private static Color ObterCorIcone(string sigla)
+        {
+            return sigla switch
+            {
+                "AL" => Color.FromRgb(0, 120, 212),
+                "PX" => Color.FromRgb(90, 90, 220),
+                "PP" => Color.FromRgb(0, 153, 102),
+                "TN" => Color.FromRgb(46, 139, 87),
+                "PV" => Color.FromRgb(0, 153, 153),
+                "CO" => Color.FromRgb(128, 0, 128),
+                "RG" => Color.FromRgb(184, 134, 11),
+                "CX" => Color.FromRgb(210, 105, 30),
+                "SB" => Color.FromRgb(220, 20, 60),
+                "CE" => Color.FromRgb(178, 34, 34),
+                "MD" => Color.FromRgb(255, 140, 0),
+                "LB" => Color.FromRgb(72, 61, 139),
+                "DL" => Color.FromRgb(169, 0, 0),
+                "TP" => Color.FromRgb(105, 105, 105),
+                _ => Color.FromRgb(96, 96, 96)
+            };
         }
     }
 
