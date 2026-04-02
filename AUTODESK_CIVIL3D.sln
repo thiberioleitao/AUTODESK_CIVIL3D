@@ -2,43 +2,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11605.240
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloCivil3D", "src\HelloCivil3D\HelloCivil3D.csproj", "{5052DF29-B82E-1C84-EC42-388927B9C6FB}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{70978E00-1670-408B-B3FE-0485DADE6076}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commands", "Commands", "{0A981E07-92F5-463A-9848-6C17C942D0BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZagoCivil3D", "src\ZagoCivil3D\ZagoCivil3D.csproj", "{5052DF29-B82E-1C84-EC42-388927B9C6FB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ribbon", "Ribbon", "{50F6BF6F-E827-43B1-9AF1-A55CF311CB90}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{3B188BD9-F632-49DA-A8F1-CB8E9D967407}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dynamo", "Dynamo", "{370B31B7-5833-4661-980A-8C8AFB203AD0}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Dropbox\PADRAO ZAGO\HDR\DYNAMO\1. CRIAR ELEMENTOS\ALINHAMENTOS\1.0 - CRIAR ALINHAMENTOS A PARTIR DE POLILINHAS COM BASE NAS ZONAS-SITES-2026.01.22.dyn = ..\..\..\Dropbox\PADRAO ZAGO\HDR\DYNAMO\1. CRIAR ELEMENTOS\ALINHAMENTOS\1.0 - CRIAR ALINHAMENTOS A PARTIR DE POLILINHAS COM BASE NAS ZONAS-SITES-2026.01.22.dyn
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
-		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Debug|x64.ActiveCfg = Debug|x64
 		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Debug|x64.Build.0 = Debug|x64
-		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Release|x64.ActiveCfg = Release|x64
 		{5052DF29-B82E-1C84-EC42-388927B9C6FB}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{5052DF29-B82E-1C84-EC42-388927B9C6FB} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B72EAC1B-CD0D-4E12-A217-3612A33ADCE7}

@@ -3,7 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 
-namespace HelloCivil3D;
+namespace ZagoCivil3D;
 
 /// <summary>
 /// Contem o comando de exemplo que pode ser carregado no Autodesk Civil 3D.
@@ -16,21 +16,21 @@ public class HelloCommand
     /// na linha de comando da aplicacao.
     /// </summary>
     [CommandMethod("HELLO_CIVIL3D")]
-    public void HelloCivil3D()
+    public void ExecutarHelloCivil3D()
     {
         // Representa o documento ativo no Civil 3D/AutoCAD.
-        Document activeDocument = Application.DocumentManager.MdiActiveDocument;
+        Document documentoAtivo = Application.DocumentManager.MdiActiveDocument;
 
         // Representa o banco de dados do desenho atual.
         // Ele nao e obrigatorio para a mensagem simples, mas foi incluido
         // para demonstrar o uso da namespace Autodesk.AutoCAD.DatabaseServices.
-        Database currentDatabase = activeDocument.Database;
+        Database bancoAtual = documentoAtivo.Database;
 
         // Representa o editor responsavel pela Command Line do AutoCAD.
-        Editor editor = activeDocument.Editor;
+        Editor editor = documentoAtivo.Editor;
 
         // Evita alerta do compilador sobre a variavel local nao utilizada.
-        _ = currentDatabase;
+        _ = bancoAtual;
 
         // Escreve a mensagem solicitada na linha de comando do Civil 3D.
         editor.WriteMessage("\nHello Civil 3D from plugin");
