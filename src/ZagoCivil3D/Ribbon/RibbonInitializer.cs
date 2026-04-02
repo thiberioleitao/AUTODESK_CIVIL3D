@@ -29,7 +29,7 @@ namespace ZagoCivil3D.Ribbon
         private const string m_panelAnotarId = "ZAGO_DRENAGEM_ANOTAR_PANEL";
         private const string m_panelDeletarId = "ZAGO_DRENAGEM_DELETAR_PANEL";
         private const string m_tabTerraplenagemId = "ZAGO_TERRAPLENAGEM_TAB";
-        private const string m_panelDummyId = "ZAGO_TERRAPLENAGEM_DUMMY_PANEL";
+        private const string m_panelFeatureLinesId = "ZAGO_TERRAPLENAGEM_FEATURE_LINES_PANEL";
         private const string m_prefixoComandoDummy = "DUMMY_PRINT:";
         private static bool m_aguardandoRibbon;
 
@@ -133,8 +133,16 @@ namespace ZagoCivil3D.Ribbon
                 AdicionarBotaoGrande(painelDeletar, "ZAGO_DELETAR_DUMMY", "Deletar\n(Dummy)", "DELETAR > FUNCOES EM DEFINICAO", "DL");
 
                 RibbonTab abaTerraplenagem = ObterOuCriarAba(ribbon, m_tabTerraplenagemId, "ZAGO - TERRAPLENAGEM");
-                RibbonPanelSource painelDummyTerraplenagem = ObterOuCriarPainelFonte(abaTerraplenagem, m_panelDummyId, "BOTÃO DUMMY");
-                AdicionarBotaoGrande(painelDummyTerraplenagem, "ZAGO_TERRAPL_DUMMY", "Botão\nDummy", "TERRAPLENAGEM > BOTAO DUMMY", "TP");
+                RibbonPanelSource painelFeatureLinesTerraplenagem = ObterOuCriarPainelFonte(
+                    abaTerraplenagem,
+                    m_panelFeatureLinesId,
+                    "FEATURE LINES");
+                AdicionarBotaoComando(
+                    painelFeatureLinesTerraplenagem,
+                    "ZAGO_TERRAPL_FEATURE_LINES_SEPARADAS",
+                    "Feature Lines\nSeparadas",
+                    "ZAGO_TERRAPLENAGEM_FEATURE_LINES_SEPARADAS ",
+                    "TP");
 
                 ribbon.ActiveTab = abaDrenagem;
 
