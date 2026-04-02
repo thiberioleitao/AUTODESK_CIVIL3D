@@ -7,6 +7,7 @@ using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using AplicacaoAutoCad = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ZagoCivil3D.Ribbon
 {
@@ -36,7 +37,7 @@ namespace ZagoCivil3D.Ribbon
         {
             try
             {
-                var documento = Application.DocumentManager.MdiActiveDocument;
+                var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
                 documento?.Editor.WriteMessage("\n[ZagoCivil3D] InitializeRibbon chamado.");
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Ribbon null? {ComponentManager.Ribbon == null}");
 
@@ -61,7 +62,7 @@ namespace ZagoCivil3D.Ribbon
             }
             catch (Exception ex)
             {
-                var documento = Application.DocumentManager.MdiActiveDocument;
+                var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Erro em InitializeRibbon: {ex.Message}");
             }
         }
@@ -70,7 +71,7 @@ namespace ZagoCivil3D.Ribbon
         {
             try
             {
-                var documento = Application.DocumentManager.MdiActiveDocument;
+                var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] OnItemInitialized disparado. Item: {argumentos.Item?.Id ?? "(sem id)"}");
 
                 if (ComponentManager.Ribbon == null)
@@ -86,7 +87,7 @@ namespace ZagoCivil3D.Ribbon
             }
             catch (Exception ex)
             {
-                var documento = Application.DocumentManager.MdiActiveDocument;
+                var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Erro em OnItemInitialized: {ex.Message}");
             }
         }
@@ -95,7 +96,7 @@ namespace ZagoCivil3D.Ribbon
         {
             try
             {
-                var documento = Application.DocumentManager.MdiActiveDocument;
+                var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
                 documento?.Editor.WriteMessage("\n[ZagoCivil3D] CreateRibbon chamado.");
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Total de abas atuais: {ribbon.Tabs.Count}");
 
@@ -142,7 +143,7 @@ namespace ZagoCivil3D.Ribbon
             }
             catch (Exception ex)
             {
-                var documento = Application.DocumentManager.MdiActiveDocument;
+                var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Erro em CreateRibbon: {ex.Message}");
             }
         }
@@ -315,7 +316,7 @@ namespace ZagoCivil3D.Ribbon
 
         public void Execute(object? parameter)
         {
-            var documento = Application.DocumentManager.MdiActiveDocument;
+            var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
             documento?.Editor.WriteMessage("\n[ZagoCivil3D] Botão do ribbon clicado.");
 
             if (documento == null)
