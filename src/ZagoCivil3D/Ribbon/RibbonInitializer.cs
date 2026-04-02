@@ -274,8 +274,26 @@ namespace ZagoCivil3D.Ribbon
                 return;
             }
 
+            textoComando = NormalizarComando(textoComando);
+
             documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Enviando comando: {textoComando.Trim()}");
             documento.SendStringToExecute(textoComando, true, false, true);
+        }
+
+        private static string NormalizarComando(string textoComando)
+        {
+            string comando = textoComando.Trim();
+
+            if (comando.Length > 0 && comando.Length % 2 == 0)
+            {
+                int metade = comando.Length / 2;
+                string primeiraMetade = comando[..metade];
+                string segundaMetade = comando[metade..];
+                if (string.Equals(primeiraMetade, segundaMetade, StringComparison.Ordinal))
+                    comando = primeiraMetade;
+            }
+
+            return comando + " ";
         }
     }
 }

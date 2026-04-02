@@ -11,6 +11,7 @@ using ZagoCivil3D.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace ZagoCivil3D.Commands
 {
@@ -79,8 +80,8 @@ namespace ZagoCivil3D.Commands
             Editor ed)
         {
             List<string> camadas = ObterTodosNomesCamadas(db);
-            List<string> estilosAlinhamento = ObterNomesEstilosAlinhamento(civilDoc);
-            List<string> conjuntosRotulos = ObterNomesConjuntosRotulosAlinhamento(civilDoc);
+            List<string> estilosAlinhamento = ObterNomesEstilosAlinhamento(civilDoc, db);
+            List<string> conjuntosRotulos = ObterNomesConjuntosRotulosAlinhamento(civilDoc, db);
 
             var tela = new CriarAlinhamentosWindow(camadas, estilosAlinhamento, conjuntosRotulos);
             bool? resultadoDialogo = tela.ShowDialog();
@@ -104,70 +105,6 @@ namespace ZagoCivil3D.Commands
             };
         }
 
-        private static string? SolicitarTexto(Editor editor, string mensagem, string? valorPadrao)
-        {
-            // Mantido para eventual fallback em modo somente linha de comando.
-            var opcoes = new PromptStringOptions(
-                $"{mensagem}{(string.IsNullOrWhiteSpace(valorPadrao) ? "" : $" <{valorPadrao}>")}: ")
-            {
-                AllowSpaces = true
-            };
-
-            PromptResult resultado = editor.GetString(opcoes);
-            if (resultado.Status == PromptStatus.Cancel)
-                return null;
-
-            if (string.IsNullOrWhiteSpace(resultado.StringResult))
-                return valorPadrao ?? string.Empty;
-
-            return resultado.StringResult;
-        }
-
-        private static int? SolicitarInteiro(Editor editor, string mensagem, int valorPadrao)
-        {
-            // Mantido para eventual fallback em modo somente linha de comando.
-            var opcoes = new PromptIntegerOptions($"{mensagem} <{valorPadrao}>: ")
-            {
-                DefaultValue = valorPadrao,
-                UseDefaultValue = true,
-                AllowNegative = false,
-                AllowZero = false,
-                AllowNone = true
-            };
-
-            PromptIntegerResult resultado = editor.GetInteger(opcoes);
-            if (resultado.Status == PromptStatus.Cancel)
-                return null;
-
-            if (resultado.Status == PromptStatus.None)
-                return valorPadrao;
-
-            return resultado.Value;
-        }
-
-        private static bool? SolicitarSimNao(Editor editor, string mensagem, bool valorPadrao)
-        {
-            // Mantido para eventual fallback em modo somente linha de comando.
-            const string Sim = "Sim";
-            const string Nao = "Nao";
-            string palavraPadrao = valorPadrao ? "Sim" : "Nao";
-            var opcoes = new PromptKeywordOptions(
-                $"{mensagem} [{nameof(Sim)}/{nameof(Nao)}] <{palavraPadrao}>: ",
-                "Sim Nao")
-            {
-                AllowNone = true
-            };
-
-            PromptResult resultado = editor.GetKeywords(opcoes);
-            if (resultado.Status == PromptStatus.Cancel)
-                return null;
-
-            if (resultado.Status == PromptStatus.None)
-                return valorPadrao;
-
-            return string.Equals(resultado.StringResult, "Sim", StringComparison.OrdinalIgnoreCase);
-        }
-
         private static List<string> ObterTodosNomesCamadas(Database db)
         {
             var nomes = new List<string>();
@@ -185,15 +122,15 @@ namespace ZagoCivil3D.Commands
             return nomes.OrderBy(x => x).ToList();
         }
 
-        private static List<string> ObterNomesEstilosAlinhamento(CivilDocument civilDoc)
+        private static List<string> ObterNomesEstilosAlinhamento(CivilDocument civilDoc, Database db)
         {
             var nomes = new List<string>();
 
-            using Transaction transacao = civilDoc.Database.TransactionManager.StartTransaction();
+            using Transaction transacao = db.TransactionManager.StartTransaction();
             foreach (ObjectId idEstilo in civilDoc.Styles.AlignmentStyles)
             {
-                DBObject estilo = transacao.GetObject(idEstilo, OpenMode.ForRead);
-                string? nomeEstilo = estilo.GetType().GetProperty("Name")?.GetValue(estilo)?.ToString();
+                Autodesk.AutoCAD.DatabaseServices.DBObject estilo = transacao.GetObject(idEstilo, OpenMode.ForRead);
+                string? nomeEstilo = ObterNomeObjeto(estilo);
                 if (!string.IsNullOrWhiteSpace(nomeEstilo))
                     nomes.Add(nomeEstilo);
             }
@@ -209,15 +146,15 @@ namespace ZagoCivil3D.Commands
             return nomes.Distinct().OrderBy(x => x).ToList();
         }
 
-        private static List<string> ObterNomesConjuntosRotulosAlinhamento(CivilDocument civilDoc)
+        private static List<string> ObterNomesConjuntosRotulosAlinhamento(CivilDocument civilDoc, Database db)
         {
             var nomes = new List<string>();
 
-            using Transaction transacao = civilDoc.Database.TransactionManager.StartTransaction();
+            using Transaction transacao = db.TransactionManager.StartTransaction();
             foreach (ObjectId idConjunto in civilDoc.Styles.LabelSetStyles.AlignmentLabelSetStyles)
             {
-                DBObject conjunto = transacao.GetObject(idConjunto, OpenMode.ForRead);
-                string? nomeConjunto = conjunto.GetType().GetProperty("Name")?.GetValue(conjunto)?.ToString();
+                Autodesk.AutoCAD.DatabaseServices.DBObject conjunto = transacao.GetObject(idConjunto, OpenMode.ForRead);
+                string? nomeConjunto = ObterNomeObjeto(conjunto);
                 if (!string.IsNullOrWhiteSpace(nomeConjunto))
                     nomes.Add(nomeConjunto);
             }
@@ -231,6 +168,19 @@ namespace ZagoCivil3D.Commands
             }
 
             return nomes.Distinct().OrderBy(x => x).ToList();
+        }
+
+        private static string? ObterNomeObjeto(Autodesk.AutoCAD.DatabaseServices.DBObject objeto)
+        {
+            PropertyInfo? propriedadeNome = objeto
+                .GetType()
+                .GetProperty("Name", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            MethodInfo? metodoGet = propriedadeNome?.GetGetMethod(true);
+            if (metodoGet == null || metodoGet.GetParameters().Length != 0)
+                return null;
+
+            return metodoGet.Invoke(objeto, null)?.ToString();
         }
     }
 }
