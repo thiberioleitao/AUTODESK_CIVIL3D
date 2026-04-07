@@ -5,6 +5,7 @@ using ZagoCivil3D.Commands;
 [assembly: ExtensionApplication(typeof(ZagoCivil3D.PluginEntry))]
 [assembly: CommandClass(typeof(ZagoCivil3D.PluginEntry))]
 [assembly: CommandClass(typeof(CriarAlinhamentosCommand))]
+[assembly: CommandClass(typeof(TerraplenagemFeatureLinesCommand))]
 
 namespace ZagoCivil3D;
 
