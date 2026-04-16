@@ -1,10 +1,9 @@
-﻿// CriarAlinhamentosCommand.cs
+// CriarAlinhamentosCommand.cs
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.Civil.ApplicationServices;
-using Autodesk.Civil.DatabaseServices;
 using Autodesk.Civil.DatabaseServices.Styles;
 using ZagoCivil3D.Models;
 using ZagoCivil3D.Services;
@@ -12,32 +11,89 @@ using ZagoCivil3D.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AplicacaoAutoCad = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ZagoCivil3D.Commands
 {
+    /// <summary>
+    /// Comando que cria alignments a partir de todas as polilinhas de um layer,
+    /// sem ordenação específica, com numeração sequencial.
+    ///
+    /// A janela é exibida em modo modeless (não bloqueia o Civil 3D),
+    /// permitindo ao usuário navegar pelo desenho enquanto ela está aberta.
+    /// </summary>
     public class CriarAlinhamentosCommand
     {
-        [CommandMethod("ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA")]
+        private static CriarAlinhamentosWindow? m_janelaAtiva;
+
+        [CommandMethod("ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA", CommandFlags.Session)]
         public void Executar()
         {
-            var documento = Application.DocumentManager.MdiActiveDocument;
+            var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
             if (documento == null)
                 return;
 
-            var banco = documento.Database;
             var editor = documento.Editor;
-            CivilDocument documentoCivil = CivilApplication.ActiveDocument;
 
             try
             {
-                editor.WriteMessage("\n[ZagoCivil3D] Comando iniciado.");
+                editor.WriteMessage("\n[ZagoCivil3D] Abrindo janela (criar alignments por polilinha).");
 
-                var requisicao = ColetarParametros(documentoCivil, banco, editor);
-                if (requisicao == null)
+                if (m_janelaAtiva != null)
                 {
-                    editor.WriteMessage("\n[ZagoCivil3D] Comando cancelado.");
+                    m_janelaAtiva.Activate();
                     return;
                 }
+
+                var banco = documento.Database;
+                CivilDocument documentoCivil = CivilApplication.ActiveDocument;
+
+                List<string> camadas = ObterTodosNomesCamadas(banco);
+                List<string> estilosAlinhamento = ObterNomesEstilosAlinhamento(documentoCivil, banco);
+                List<string> conjuntosRotulos = ObterNomesConjuntosRotulosAlinhamento(documentoCivil, banco);
+
+                var janela = new CriarAlinhamentosWindow(camadas, estilosAlinhamento, conjuntosRotulos);
+                janela.ConfirmarClicado += AoConfirmarJanela;
+                janela.Closed += (s, e) =>
+                {
+                    if (m_janelaAtiva != null)
+                        m_janelaAtiva.ConfirmarClicado -= AoConfirmarJanela;
+                    m_janelaAtiva = null;
+                };
+
+                m_janelaAtiva = janela;
+                AplicacaoAutoCad.ShowModelessWindow(janela);
+            }
+            catch (System.Exception ex)
+            {
+                editor.WriteMessage($"\n[ZagoCivil3D] Erro no comando: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handler disparado pela janela modeless quando o usuário clica em
+        /// "Criar Alignments". Bloqueia o documento ativo e delega ao serviço.
+        /// </summary>
+        private static void AoConfirmarJanela(object? remetente, CriarAlinhamentosRequest requisicao)
+        {
+            var janela = remetente as CriarAlinhamentosWindow;
+            var documento = AplicacaoAutoCad.DocumentManager.MdiActiveDocument;
+            if (documento == null)
+            {
+                janela?.DefinirStatus("Nenhum documento ativo.", sucesso: false);
+                return;
+            }
+
+            var editor = documento.Editor;
+            var banco = documento.Database;
+
+            try
+            {
+                using DocumentLock bloqueio = documento.LockDocument();
+
+                CivilDocument documentoCivil = CivilApplication.ActiveDocument;
+
+                editor.WriteMessage("\n[ZagoCivil3D] Executando criação de alignments…");
 
                 CriarAlinhamentosResultado resultado =
                     AlignmentCreationService.Executar(documentoCivil, banco, editor, requisicao);
@@ -46,7 +102,6 @@ namespace ZagoCivil3D.Commands
                 editor.WriteMessage("\n===== RESUMO =====");
                 editor.WriteMessage($"\nPolilinhas encontradas: {resultado.TotalPolilinhas}");
                 editor.WriteMessage($"\nAlignments criados: {resultado.TotalCriados}");
-                editor.WriteMessage($"\nSem zona: {resultado.TotalSemZona}");
 
                 if (resultado.NomesCriados.Count > 0)
                 {
@@ -63,40 +118,21 @@ namespace ZagoCivil3D.Commands
                 }
 
                 editor.WriteMessage("\n===== FIM =====");
+
+                string mensagemStatus =
+                    $"Criação concluída: {resultado.TotalCriados}/{resultado.TotalPolilinhas} alignments."
+                    + (resultado.MensagensErro.Count > 0
+                        ? $" {resultado.MensagensErro.Count} aviso(s) — veja a linha de comando."
+                        : string.Empty);
+
+                bool sucesso = resultado.TotalCriados > 0 && resultado.MensagensErro.Count == 0;
+                janela?.DefinirStatus(mensagemStatus, sucesso);
             }
             catch (System.Exception ex)
             {
-                editor.WriteMessage($"\n[ZagoCivil3D] Erro no comando: {ex.Message}");
+                editor.WriteMessage($"\n[ZagoCivil3D] Erro durante execução: {ex.Message}");
+                janela?.DefinirStatus($"Erro: {ex.Message}", sucesso: false);
             }
-        }
-
-        private static CriarAlinhamentosRequest? ColetarParametros(
-            CivilDocument civilDoc,
-            Database db,
-            Editor ed)
-        {
-            List<string> camadas = ObterTodosNomesCamadas(db);
-            List<string> estilosAlinhamento = ObterNomesEstilosAlinhamento(civilDoc, db);
-            List<string> conjuntosRotulos = ObterNomesConjuntosRotulosAlinhamento(civilDoc, db);
-
-            var tela = new CriarAlinhamentosWindow(camadas, estilosAlinhamento, conjuntosRotulos);
-            bool? resultadoDialogo = tela.ShowDialog();
-
-            if (resultadoDialogo != true)
-                return null;
-
-            return new CriarAlinhamentosRequest
-            {
-                Prefixo = tela.Prefixo,
-                IdentificadorZona = tela.IdentificadorZona,
-                NomeCamadaOrigem = tela.NomeCamadaOrigem,
-                NomeCamadaDestino = tela.NomeCamadaOrigem,
-                NomeEstiloAlinhamento = tela.NomeEstiloAlinhamento,
-                NomeConjuntoRotulosAlinhamento = tela.NomeConjuntoRotulosAlinhamento,
-                NumeroInicial = tela.NumeroInicial,
-                Incremento = tela.Incremento,
-                ApagarPolilinhasOriginais = tela.ApagarPolilinhasOriginais
-            };
         }
 
         private static List<string> ObterTodosNomesCamadas(Database db)
