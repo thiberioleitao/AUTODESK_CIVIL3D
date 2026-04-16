@@ -78,6 +78,7 @@ namespace ZagoCivil3D.Services
                 return resultado;
             }
 
+
             string identificadorZona = request.IdentificadorZona.Trim();
             string sufixoZona = string.IsNullOrWhiteSpace(identificadorZona)
                 ? string.Empty
@@ -149,6 +150,230 @@ namespace ZagoCivil3D.Services
 
             transacao.Commit();
             return resultado;
+        }
+
+        /// <summary>
+        /// Executa criação de alignments a partir de dois layers: primeiro processa
+        /// as polilinhas horizontais (sentido L-O) ordenadas Norte→Sul (maior Y primeiro),
+        /// em seguida as verticais (sentido N-S) ordenadas Oeste→Leste (menor X primeiro).
+        /// A numeração é sequencial e compartilhada entre os dois grupos.
+        /// </summary>
+        public static CriarAlinhamentosResultado ExecutarOrdenado(
+            CivilDocument civilDoc,
+            Database db,
+            Editor ed,
+            CriarAlinhamentosOrdenadosRequest request)
+        {
+            var resultado = new CriarAlinhamentosResultado();
+
+            using var transacao = db.TransactionManager.StartTransaction();
+
+            ObjectId idCamadaHorizontais = ObterIdCamadaPorNome(db, transacao, request.NomeCamadaHorizontais);
+            if (idCamadaHorizontais == ObjectId.Null)
+            {
+                resultado.MensagensErro.Add(
+                    $"Layer de horizontais '{request.NomeCamadaHorizontais}' não encontrada.");
+                return resultado;
+            }
+
+            ObjectId idCamadaVerticais = ObterIdCamadaPorNome(db, transacao, request.NomeCamadaVerticais);
+            if (idCamadaVerticais == ObjectId.Null)
+            {
+                resultado.MensagensErro.Add(
+                    $"Layer de verticais '{request.NomeCamadaVerticais}' não encontrada.");
+                return resultado;
+            }
+
+            ObjectId idEstilo = ObterIdEstiloAlinhamento(civilDoc, request.NomeEstiloAlinhamento);
+            if (idEstilo == ObjectId.Null)
+            {
+                resultado.MensagensErro.Add(
+                    $"Estilo de alignment '{request.NomeEstiloAlinhamento}' não encontrado.");
+                return resultado;
+            }
+
+            ObjectId idConjuntoRotulos =
+                ObterIdConjuntoRotulosAlinhamento(civilDoc, request.NomeConjuntoRotulosAlinhamento);
+            if (idConjuntoRotulos == ObjectId.Null)
+            {
+                resultado.MensagensErro.Add(
+                    $"Label set de alignment '{request.NomeConjuntoRotulosAlinhamento}' não encontrado.");
+                return resultado;
+            }
+
+            List<ObjectId> horizontais = ObterPolilinhasDaCamada(db, transacao, request.NomeCamadaHorizontais);
+            List<ObjectId> verticais = ObterPolilinhasDaCamada(db, transacao, request.NomeCamadaVerticais);
+
+            resultado.TotalPolilinhas = horizontais.Count + verticais.Count;
+
+            if (resultado.TotalPolilinhas == 0)
+            {
+                resultado.MensagensErro.Add(
+                    $"Nenhuma polilinha encontrada nas layers '{request.NomeCamadaHorizontais}' e '{request.NomeCamadaVerticais}'.");
+                return resultado;
+            }
+
+            List<ObjectId> horizontaisOrdenadas = OrdenarPorChave(
+                horizontais,
+                transacao,
+                ext => ext.MaxPoint.Y,
+                descendente: true);
+
+            List<ObjectId> verticaisOrdenadas = OrdenarPorChave(
+                verticais,
+                transacao,
+                ext => ext.MinPoint.X,
+                descendente: false);
+
+            int numeroAtual = request.NumeroInicial;
+
+            // Monta a ordem de processamento conforme a escolha do usuário.
+            // Cada tupla: (polilinhas ordenadas, id da layer destino, rótulo informativo).
+            var etapas = new List<(List<ObjectId> Lista, ObjectId IdCamada, string Rotulo)>();
+            if (request.HorizontaisPrimeiro)
+            {
+                etapas.Add((horizontaisOrdenadas, idCamadaHorizontais, "horizontal (N→S)"));
+                etapas.Add((verticaisOrdenadas, idCamadaVerticais, "vertical (O→L)"));
+            }
+            else
+            {
+                etapas.Add((verticaisOrdenadas, idCamadaVerticais, "vertical (O→L)"));
+                etapas.Add((horizontaisOrdenadas, idCamadaHorizontais, "horizontal (N→S)"));
+            }
+
+            foreach (var etapa in etapas)
+            {
+                numeroAtual = CriarAlignmentsDaLista(
+                    civilDoc,
+                    transacao,
+                    ed,
+                    etapa.Lista,
+                    request.Prefixo,
+                    etapa.IdCamada,
+                    idEstilo,
+                    idConjuntoRotulos,
+                    request.ApagarPolilinhasOriginais,
+                    numeroAtual,
+                    etapa.Rotulo,
+                    resultado);
+            }
+
+            transacao.Commit();
+            return resultado;
+        }
+
+        /// <summary>
+        /// Ordena polilinhas por uma chave geométrica derivada dos extents.
+        /// Polilinhas sem extents válidos ficam no final da lista para não quebrar o fluxo.
+        /// </summary>
+        private static List<ObjectId> OrdenarPorChave(
+            List<ObjectId> polilinhas,
+            Transaction transacao,
+            Func<Extents3d, double> seletorChave,
+            bool descendente)
+        {
+            var comChave = new List<(ObjectId Id, double Chave, bool Valido)>();
+
+            foreach (ObjectId id in polilinhas)
+            {
+                if (transacao.GetObject(id, OpenMode.ForRead) is not Autodesk.AutoCAD.DatabaseServices.Entity entidade)
+                {
+                    comChave.Add((id, 0.0, false));
+                    continue;
+                }
+
+                try
+                {
+                    Extents3d extents = entidade.GeometricExtents;
+                    comChave.Add((id, seletorChave(extents), true));
+                }
+                catch
+                {
+                    comChave.Add((id, 0.0, false));
+                }
+            }
+
+            IEnumerable<(ObjectId Id, double Chave, bool Valido)> ordenados = descendente
+                ? comChave.Where(x => x.Valido).OrderByDescending(x => x.Chave)
+                : comChave.Where(x => x.Valido).OrderBy(x => x.Chave);
+
+            var resultado = ordenados.Select(x => x.Id).ToList();
+            resultado.AddRange(comChave.Where(x => !x.Valido).Select(x => x.Id));
+            return resultado;
+        }
+
+        /// <summary>
+        /// Cria alignments para cada polilinha da lista, usando o numerador sequencial
+        /// compartilhado. Retorna o próximo número disponível após o processamento.
+        /// </summary>
+        private static int CriarAlignmentsDaLista(
+            CivilDocument civilDoc,
+            Transaction transacao,
+            Editor ed,
+            List<ObjectId> polilinhas,
+            string prefixo,
+            ObjectId idCamadaDestino,
+            ObjectId idEstilo,
+            ObjectId idConjuntoRotulos,
+            bool apagarOriginais,
+            int numeroInicial,
+            string rotulo,
+            CriarAlinhamentosResultado resultado)
+        {
+            int numeroAtual = numeroInicial;
+
+            foreach (ObjectId idPolilinha in polilinhas)
+            {
+                try
+                {
+                    if (transacao.GetObject(idPolilinha, OpenMode.ForRead)
+                        is not Autodesk.AutoCAD.DatabaseServices.Entity)
+                    {
+                        resultado.MensagensErro.Add(
+                            $"Entidade {idPolilinha.Handle} não pôde ser aberta ({rotulo}).");
+                        continue;
+                    }
+
+                    string nomeBase = $"{prefixo}{numeroAtual:00}";
+                    string nomeFinal = ObterNomeAlinhamentoUnico(civilDoc, transacao, nomeBase);
+
+                    var opcoesPolilinha = new PolylineOptions
+                    {
+                        PlineId = idPolilinha,
+                        AddCurvesBetweenTangents = false,
+                        EraseExistingEntities = apagarOriginais
+                    };
+
+                    ObjectId idAlinhamento = Alignment.Create(
+                        civilDoc,
+                        opcoesPolilinha,
+                        nomeFinal,
+                        ObjectId.Null,
+                        idCamadaDestino,
+                        idEstilo,
+                        idConjuntoRotulos);
+
+                    if (idAlinhamento == ObjectId.Null)
+                    {
+                        resultado.MensagensErro.Add(
+                            $"Falha ao criar alignment para polilinha {idPolilinha.Handle} ({rotulo}).");
+                        continue;
+                    }
+
+                    resultado.TotalCriados++;
+                    resultado.NomesCriados.Add(nomeFinal);
+                    ed.WriteMessage($"\n[ZagoCivil3D] Alignment criado: {nomeFinal} ({rotulo})");
+
+                    numeroAtual += 1;
+                }
+                catch (System.Exception ex)
+                {
+                    resultado.MensagensErro.Add(
+                        $"Erro ao processar polilinha {idPolilinha.Handle} ({rotulo}): {ex.Message}");
+                }
+            }
+
+            return numeroAtual;
         }
 
         private static List<ObjectId> ObterPolilinhasDaCamada(

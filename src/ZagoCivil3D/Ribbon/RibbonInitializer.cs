@@ -102,35 +102,50 @@ namespace ZagoCivil3D.Ribbon
 
                 RibbonTab abaDrenagem = ObterOuCriarAba(ribbon, m_tabDrenagemId, "ZAGO - DRENAGEM");
                 RibbonPanelSource painelCriarAlinhamentos = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarAlinhamentosId, "CRIAR - ALINHAMENTOS");
-                AdicionarBotaoComando(painelCriarAlinhamentos, "ZAGO_CRIAR_ALINH_POR_POLI", "Alinhamentos\npor Polilinha", "ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA ", "AL");
+                AdicionarBotaoComando(
+                    painelCriarAlinhamentos,
+                    "ZAGO_CRIAR_ALINH_POR_POLI",
+                    "Por Polilinha",
+                    "ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA ",
+                    "AL",
+                    "Cria alignments a partir das polilinhas de uma layer, sem ordenação específica.");
+                AdicionarBotaoComando(
+                    painelCriarAlinhamentos,
+                    "ZAGO_CRIAR_ALINH_ORDENADOS",
+                    "Ordenados\nH e V",
+                    "ZAGO_CRIAR_ALINHAMENTOS_ORDENADOS ",
+                    "AO",
+                    "Cria alignments a partir de dois layers: primeiro as polilinhas horizontais (ordenadas Norte→Sul), em seguida as verticais (ordenadas Oeste→Leste), com numeração sequencial. Janela modeless.");
                 AdicionarBotaoGrande(painelCriarAlinhamentos, "ZAGO_CRIAR_PONTOS_CRUZ", "Pontos nos\nCruzamentos", "CRIAR - ALINHAMENTOS > PONTOS NOS CRUZAMENTOS ENTRE ALINHAMENTOS", "PX");
 
+                AdicionarBotaoGrande(painelCriarAlinhamentos, "ZAGO_CRIAR_PONTOS_CRUZ", "Pontos nos\nCruzamentos", "CRIAR - ALINHAMENTOS > PONTOS NOS CRUZAMENTOS ENTRE ALINHAMENTOS", "PX", "Cria pontos nos cruzamentos entre alignments (em definição).");
+
                 RibbonPanelSource painelCriarPerfis = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarPerfisId, "CRIAR - PERFIS");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "CRIAR - PERFIS > PERFIS DE PROJETO A PARTIR DE ALINHAMENTOS", "PP");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_TN", "Perfis TN e\nTerraplenagem", "CRIAR - PERFIS > PERFIS DO TERRENO NATURAL E TERRAPLENAGEM", "TN");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PROFILE_VIEW", "Profile\nView", "CRIAR - PERFIS > PROFILE VIEW", "PV");
+                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "CRIAR - PERFIS > PERFIS DE PROJETO A PARTIR DE ALINHAMENTOS", "PP", "Cria perfis de projeto a partir dos alignments (em definição).");
+                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_TN", "Perfis TN e\nTerraplenagem", "CRIAR - PERFIS > PERFIS DO TERRENO NATURAL E TERRAPLENAGEM", "TN", "Cria perfis do terreno natural e de terraplenagem (em definição).");
+                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PROFILE_VIEW", "Profile\nView", "CRIAR - PERFIS > PROFILE VIEW", "PV", "Cria profile view a partir dos perfis (em definição).");
 
                 RibbonPanelSource painelCriarCorredores = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCorredoresId, "CRIAR - CORREDORES");
-                AdicionarBotaoGrande(painelCriarCorredores, "ZAGO_CRIAR_CORREDORES", "Criar\nCorredores", "CRIAR - CORREDORES > FUNCOES DE CRIACAO DE CORREDORES", "CO");
+                AdicionarBotaoGrande(painelCriarCorredores, "ZAGO_CRIAR_CORREDORES", "Criar\nCorredores", "CRIAR - CORREDORES > FUNCOES DE CRIACAO DE CORREDORES", "CO", "Funções de criação de corredores (em definição).");
 
                 RibbonPanelSource painelCriarRegioes = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarRegioesId, "CRIAR - REGIOES");
-                AdicionarBotaoGrande(painelCriarRegioes, "ZAGO_CRIAR_REGIOES", "Criar\nRegioes", "CRIAR - REGIOES > FUNCOES DE CRIACAO DE REGIOES", "RG");
+                AdicionarBotaoGrande(painelCriarRegioes, "ZAGO_CRIAR_REGIOES", "Criar\nRegioes", "CRIAR - REGIOES > FUNCOES DE CRIACAO DE REGIOES", "RG", "Funções de criação de regiões (em definição).");
 
                 RibbonPanelSource painelCriarCaixas = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCaixasId, "CRIAR - CAIXAS");
-                AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS", "CX");
+                AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS", "CX", "Funções de criação de caixas de drenagem (em definição).");
 
                 RibbonPanelSource painelExportar = ObterOuCriarPainelFonte(abaDrenagem, m_panelExportarId, "EXPORTAR");
-                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_BACIAS", "CSV Bacias e\nSubbacias", "EXPORTAR > CSV BACIAS/SUBBACIAS (ID, AREA, TALVEGUE, DECLIVIDADE, ID_JUSANTE)", "SB");
-                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_CANAIS", "CSV Canais\ne Bueiros", "EXPORTAR > CSV CANAIS E BUEIROS", "CE");
+                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_BACIAS", "CSV Bacias e\nSubbacias", "EXPORTAR > CSV BACIAS/SUBBACIAS (ID, AREA, TALVEGUE, DECLIVIDADE, ID_JUSANTE)", "SB", "Exporta CSV com dados de bacias e subbacias (em definição).");
+                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_CANAIS", "CSV Canais\ne Bueiros", "EXPORTAR > CSV CANAIS E BUEIROS", "CE", "Exporta CSV com dados de canais e bueiros (em definição).");
 
                 RibbonPanelSource painelModificar = ObterOuCriarPainelFonte(abaDrenagem, m_panelModificarId, "MODIFICAR");
-                AdicionarBotaoGrande(painelModificar, "ZAGO_MODIFICAR_DUMMY", "Modificar\n(Dummy)", "MODIFICAR > FUNCOES EM DEFINICAO", "MD");
+                AdicionarBotaoGrande(painelModificar, "ZAGO_MODIFICAR_DUMMY", "Modificar\n(Dummy)", "MODIFICAR > FUNCOES EM DEFINICAO", "MD", "Funções de modificação (em definição).");
 
                 RibbonPanelSource painelAnotar = ObterOuCriarPainelFonte(abaDrenagem, m_panelAnotarId, "ANOTAR");
-                AdicionarBotaoGrande(painelAnotar, "ZAGO_ANOTAR_LABELS_CORR", "Labels\nCorredores", "ANOTAR > ADICIONAR LABELS DOS TRECHOS/REGIOES DOS CORREDORES EM PLANTA", "LB");
+                AdicionarBotaoGrande(painelAnotar, "ZAGO_ANOTAR_LABELS_CORR", "Labels\nCorredores", "ANOTAR > ADICIONAR LABELS DOS TRECHOS/REGIOES DOS CORREDORES EM PLANTA", "LB", "Adiciona labels dos trechos/regiões dos corredores em planta (em definição).");
 
                 RibbonPanelSource painelDeletar = ObterOuCriarPainelFonte(abaDrenagem, m_panelDeletarId, "DELETAR");
-                AdicionarBotaoGrande(painelDeletar, "ZAGO_DELETAR_DUMMY", "Deletar\n(Dummy)", "DELETAR > FUNCOES EM DEFINICAO", "DL");
+                AdicionarBotaoGrande(painelDeletar, "ZAGO_DELETAR_DUMMY", "Deletar\n(Dummy)", "DELETAR > FUNCOES EM DEFINICAO", "DL", "Funções de exclusão (em definição).");
 
                 RibbonTab abaTerraplenagem = ObterOuCriarAba(ribbon, m_tabTerraplenagemId, "ZAGO - TERRAPLENAGEM");
                 RibbonPanelSource painelFeatureLinesTerraplenagem = ObterOuCriarPainelFonte(
@@ -142,7 +157,8 @@ namespace ZagoCivil3D.Ribbon
                     "ZAGO_TERRAPL_FEATURE_LINES_SEPARADAS",
                     "Feature Lines\nSeparadas",
                     "ZAGO_TERRAPLENAGEM_FEATURE_LINES_SEPARADAS ",
-                    "TP");
+                    "TP",
+                    "Cria feature lines separadas a partir de polilinhas de terraplenagem.");
 
                 documento?.Editor.WriteMessage("\n[ZagoCivil3D] Aba e botão criados com sucesso.");
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Aba ativa: {ribbon.ActiveTab?.Id ?? "(nenhuma)"}");
@@ -199,9 +215,10 @@ namespace ZagoCivil3D.Ribbon
             string idBotao,
             string textoBotao,
             string mensagemDummy,
-            string siglaIcone)
+            string siglaIcone,
+            string descricao = "")
         {
-            AdicionarBotao(fontePainel, idBotao, textoBotao, m_prefixoComandoDummy + mensagemDummy, siglaIcone);
+            AdicionarBotao(fontePainel, idBotao, textoBotao, m_prefixoComandoDummy + mensagemDummy, siglaIcone, descricao);
         }
 
         private static void AdicionarBotaoComando(
@@ -209,9 +226,10 @@ namespace ZagoCivil3D.Ribbon
             string idBotao,
             string textoBotao,
             string nomeComando,
-            string siglaIcone)
+            string siglaIcone,
+            string descricao = "")
         {
-            AdicionarBotao(fontePainel, idBotao, textoBotao, nomeComando, siglaIcone);
+            AdicionarBotao(fontePainel, idBotao, textoBotao, nomeComando, siglaIcone, descricao);
         }
 
         private static void AdicionarBotao(
@@ -219,7 +237,8 @@ namespace ZagoCivil3D.Ribbon
             string idBotao,
             string textoBotao,
             string parametroComando,
-            string siglaIcone)
+            string siglaIcone,
+            string descricao = "")
         {
             bool botaoExiste = fontePainel.Items
                 .OfType<RibbonButton>()
@@ -233,55 +252,355 @@ namespace ZagoCivil3D.Ribbon
                 Id = idBotao,
                 Text = textoBotao,
                 ShowText = true,
+                ShowImage = true,
                 Size = RibbonItemSize.Large,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
-                LargeImage = CriarIcone(siglaIcone),
+                LargeImage = CriarIcone(siglaIcone, grande: true),
+                Image = CriarIcone(siglaIcone, grande: false),
                 CommandParameter = parametroComando,
                 CommandHandler = new ManipuladorComandoRibbon()
             };
 
+            if (!string.IsNullOrWhiteSpace(descricao))
+            {
+                botao.Description = descricao;
+                botao.ToolTip = new RibbonToolTip
+                {
+                    Title = textoBotao.Replace("\n", " "),
+                    Content = descricao,
+                    Command = idBotao
+                };
+            }
+
             fontePainel.Items.Add(botao);
         }
 
-        private static ImageSource CriarIcone(string sigla)
+        /// <summary>
+        /// Gera um ícone vetorial representativo do comando, no estilo dos ícones
+        /// nativos do Civil 3D: fundo transparente, glifo desenhado com a cor de
+        /// destaque da categoria. Quando <paramref name="grande"/> é verdadeiro o
+        /// ícone é 32x32 (LargeImage), caso contrário 16x16 (Image).
+        /// </summary>
+        private static ImageSource CriarIcone(string sigla, bool grande)
         {
-            const int largura = 32;
-            const int altura = 32;
-
+            int tamanho = grande ? 32 : 16;
             var visual = new DrawingVisual();
-            using DrawingContext contexto = visual.RenderOpen();
+            using (DrawingContext contexto = visual.RenderOpen())
+            {
+                Color corPrincipal = ObterCorIcone(sigla);
+                var pincelPrincipal = new SolidColorBrush(corPrincipal);
+                pincelPrincipal.Freeze();
+                var pincelClaro = new SolidColorBrush(Color.FromArgb(60, corPrincipal.R, corPrincipal.G, corPrincipal.B));
+                pincelClaro.Freeze();
+                var pincelEscuro = new SolidColorBrush(Color.FromRgb(
+                    (byte)(corPrincipal.R * 0.55),
+                    (byte)(corPrincipal.G * 0.55),
+                    (byte)(corPrincipal.B * 0.55)));
+                pincelEscuro.Freeze();
+                var pincelCinza = new SolidColorBrush(Color.FromRgb(140, 140, 140));
+                pincelCinza.Freeze();
 
-            Color corFundo = ObterCorIcone(sigla);
-            var retangulo = new Rect(0, 0, largura, altura);
-            var pincelFundo = new SolidColorBrush(corFundo);
-            pincelFundo.Freeze();
+                DesenharGlifo(contexto, sigla, tamanho, pincelPrincipal, pincelClaro, pincelEscuro, pincelCinza);
+            }
 
-            var pincelBorda = new SolidColorBrush(Color.FromRgb(33, 37, 43));
-            pincelBorda.Freeze();
-
-            contexto.DrawRoundedRectangle(pincelFundo, new Pen(pincelBorda, 1), retangulo, 6, 6);
-
-            double pixelsPorDip = VisualTreeHelper.GetDpi(visual).PixelsPerDip;
-            var texto = new FormattedText(
-                sigla,
-                System.Globalization.CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight,
-                new Typeface(new FontFamily("Segoe UI Semibold"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal),
-                12,
-                Brushes.White,
-                pixelsPorDip);
-
-            Point pontoTexto = new(
-                (largura - texto.Width) / 2,
-                (altura - texto.Height) / 2 - 1);
-
-            contexto.DrawText(texto, pontoTexto);
-
-            var bitmap = new RenderTargetBitmap(largura, altura, 96, 96, PixelFormats.Pbgra32);
+            var bitmap = new RenderTargetBitmap(tamanho, tamanho, 96, 96, PixelFormats.Pbgra32);
             bitmap.Render(visual);
             bitmap.Freeze();
-
             return bitmap;
+        }
+
+        /// <summary>
+        /// Despachante que escolhe o glifo apropriado para cada sigla.
+        /// Todos os desenhos usam coordenadas normalizadas (0..tamanho)
+        /// para funcionar em 16x16 e 32x32.
+        /// </summary>
+        private static void DesenharGlifo(
+            DrawingContext g,
+            string sigla,
+            int tamanho,
+            Brush corPrincipal,
+            Brush corClara,
+            Brush corEscura,
+            Brush corCinza)
+        {
+            double s = tamanho;
+            double linhaFina = tamanho <= 16 ? 1.2 : 1.8;
+            double linhaGrossa = tamanho <= 16 ? 1.6 : 2.4;
+            var penPrincipal = new Pen(corPrincipal, linhaGrossa) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round };
+            var penEscuro = new Pen(corEscura, linhaFina) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round };
+            var penCinza = new Pen(corCinza, linhaFina) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+            penPrincipal.Freeze();
+            penEscuro.Freeze();
+            penCinza.Freeze();
+
+            switch (sigla)
+            {
+                case "AL":
+                    // Polilinha com vértices (símbolo de alignment genérico)
+                    {
+                        var polilinha = new StreamGeometry();
+                        using (var ctx = polilinha.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.12, s * 0.75), false, false);
+                            ctx.LineTo(new Point(s * 0.35, s * 0.45), true, false);
+                            ctx.LineTo(new Point(s * 0.60, s * 0.60), true, false);
+                            ctx.LineTo(new Point(s * 0.88, s * 0.22), true, false);
+                        }
+                        polilinha.Freeze();
+                        g.DrawGeometry(null, penPrincipal, polilinha);
+                        double r = s * 0.08;
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.12, s * 0.75), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.35, s * 0.45), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.60, s * 0.60), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.88, s * 0.22), r, r);
+                    }
+                    break;
+
+                case "AO":
+                    // Grade com setas indicando ordem N→S (vertical) e O→L (horizontal)
+                    {
+                        // Linhas horizontais paralelas (grupo de horizontais)
+                        g.DrawLine(penEscuro, new Point(s * 0.15, s * 0.30), new Point(s * 0.85, s * 0.30));
+                        g.DrawLine(penEscuro, new Point(s * 0.15, s * 0.50), new Point(s * 0.85, s * 0.50));
+                        g.DrawLine(penEscuro, new Point(s * 0.15, s * 0.70), new Point(s * 0.85, s * 0.70));
+                        // Seta vertical N→S à esquerda
+                        g.DrawLine(penPrincipal, new Point(s * 0.08, s * 0.15), new Point(s * 0.08, s * 0.85));
+                        var setaBaixo = new StreamGeometry();
+                        using (var ctx = setaBaixo.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.08, s * 0.90), true, true);
+                            ctx.LineTo(new Point(s * 0.02, s * 0.78), true, false);
+                            ctx.LineTo(new Point(s * 0.14, s * 0.78), true, false);
+                        }
+                        setaBaixo.Freeze();
+                        g.DrawGeometry(corPrincipal, null, setaBaixo);
+                        // Seta horizontal O→L no topo
+                        g.DrawLine(penPrincipal, new Point(s * 0.20, s * 0.10), new Point(s * 0.90, s * 0.10));
+                        var setaDireita = new StreamGeometry();
+                        using (var ctx = setaDireita.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.95, s * 0.10), true, true);
+                            ctx.LineTo(new Point(s * 0.83, s * 0.04), true, false);
+                            ctx.LineTo(new Point(s * 0.83, s * 0.16), true, false);
+                        }
+                        setaDireita.Freeze();
+                        g.DrawGeometry(corPrincipal, null, setaDireita);
+                    }
+                    break;
+
+                case "PX":
+                    // Duas linhas cruzando com ponto no cruzamento
+                    g.DrawLine(penEscuro, new Point(s * 0.10, s * 0.10), new Point(s * 0.90, s * 0.90));
+                    g.DrawLine(penEscuro, new Point(s * 0.90, s * 0.10), new Point(s * 0.10, s * 0.90));
+                    g.DrawEllipse(corPrincipal, null, new Point(s * 0.50, s * 0.50), s * 0.14, s * 0.14);
+                    break;
+
+                case "PP":
+                    // Perfil longitudinal: linha base + curva de perfil acima
+                    g.DrawLine(penCinza, new Point(s * 0.10, s * 0.80), new Point(s * 0.90, s * 0.80));
+                    {
+                        var curva = new StreamGeometry();
+                        using (var ctx = curva.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.10, s * 0.60), false, false);
+                            ctx.LineTo(new Point(s * 0.30, s * 0.30), true, false);
+                            ctx.LineTo(new Point(s * 0.55, s * 0.50), true, false);
+                            ctx.LineTo(new Point(s * 0.75, s * 0.25), true, false);
+                            ctx.LineTo(new Point(s * 0.90, s * 0.45), true, false);
+                        }
+                        curva.Freeze();
+                        g.DrawGeometry(null, penPrincipal, curva);
+                    }
+                    break;
+
+                case "TN":
+                    // Perfil do terreno natural: zigzag de montanha
+                    {
+                        var montanha = new StreamGeometry();
+                        using (var ctx = montanha.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.08, s * 0.80), true, true);
+                            ctx.LineTo(new Point(s * 0.28, s * 0.40), true, false);
+                            ctx.LineTo(new Point(s * 0.48, s * 0.60), true, false);
+                            ctx.LineTo(new Point(s * 0.70, s * 0.25), true, false);
+                            ctx.LineTo(new Point(s * 0.92, s * 0.55), true, false);
+                            ctx.LineTo(new Point(s * 0.92, s * 0.80), true, false);
+                        }
+                        montanha.Freeze();
+                        g.DrawGeometry(corClara, penPrincipal, montanha);
+                        g.DrawLine(penCinza, new Point(s * 0.05, s * 0.80), new Point(s * 0.95, s * 0.80));
+                    }
+                    break;
+
+                case "PV":
+                    // Profile view: eixos (L + curva)
+                    g.DrawLine(penEscuro, new Point(s * 0.15, s * 0.15), new Point(s * 0.15, s * 0.85));
+                    g.DrawLine(penEscuro, new Point(s * 0.15, s * 0.85), new Point(s * 0.90, s * 0.85));
+                    {
+                        var curva = new StreamGeometry();
+                        using (var ctx = curva.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.20, s * 0.70), false, false);
+                            ctx.LineTo(new Point(s * 0.40, s * 0.40), true, false);
+                            ctx.LineTo(new Point(s * 0.62, s * 0.55), true, false);
+                            ctx.LineTo(new Point(s * 0.85, s * 0.30), true, false);
+                        }
+                        curva.Freeze();
+                        g.DrawGeometry(null, penPrincipal, curva);
+                    }
+                    break;
+
+                case "CO":
+                    // Corredor: duas curvas paralelas com hachura central
+                    {
+                        var curvaA = new StreamGeometry();
+                        using (var ctx = curvaA.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.10, s * 0.30), false, false);
+                            ctx.LineTo(new Point(s * 0.90, s * 0.30), true, false);
+                        }
+                        curvaA.Freeze();
+                        var curvaB = new StreamGeometry();
+                        using (var ctx = curvaB.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.10, s * 0.70), false, false);
+                            ctx.LineTo(new Point(s * 0.90, s * 0.70), true, false);
+                        }
+                        curvaB.Freeze();
+                        g.DrawGeometry(null, penPrincipal, curvaA);
+                        g.DrawGeometry(null, penPrincipal, curvaB);
+                        // traços centrais (faixa)
+                        double y = s * 0.50;
+                        g.DrawLine(penCinza, new Point(s * 0.18, y), new Point(s * 0.30, y));
+                        g.DrawLine(penCinza, new Point(s * 0.44, y), new Point(s * 0.56, y));
+                        g.DrawLine(penCinza, new Point(s * 0.70, y), new Point(s * 0.82, y));
+                    }
+                    break;
+
+                case "RG":
+                    // Região: polígono fechado preenchido
+                    {
+                        var poli = new StreamGeometry();
+                        using (var ctx = poli.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.20, s * 0.20), true, true);
+                            ctx.LineTo(new Point(s * 0.80, s * 0.25), true, false);
+                            ctx.LineTo(new Point(s * 0.85, s * 0.70), true, false);
+                            ctx.LineTo(new Point(s * 0.50, s * 0.88), true, false);
+                            ctx.LineTo(new Point(s * 0.18, s * 0.65), true, false);
+                        }
+                        poli.Freeze();
+                        g.DrawGeometry(corClara, penPrincipal, poli);
+                    }
+                    break;
+
+                case "CX":
+                    // Caixa (catch basin): retângulo com tubulação saindo
+                    g.DrawRectangle(corClara, penPrincipal, new Rect(s * 0.22, s * 0.30, s * 0.42, s * 0.42));
+                    g.DrawRectangle(corPrincipal, null, new Rect(s * 0.22, s * 0.30, s * 0.42, s * 0.08));
+                    g.DrawLine(penEscuro, new Point(s * 0.64, s * 0.55), new Point(s * 0.90, s * 0.55));
+                    break;
+
+                case "SB":
+                    // Bacias: gotas / curvas de nível
+                    {
+                        var c1 = new StreamGeometry();
+                        using (var ctx = c1.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.20, s * 0.30), false, false);
+                            ctx.BezierTo(new Point(s * 0.40, s * 0.20), new Point(s * 0.60, s * 0.20), new Point(s * 0.80, s * 0.35), true, false);
+                        }
+                        c1.Freeze();
+                        var c2 = new StreamGeometry();
+                        using (var ctx = c2.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.15, s * 0.50), false, false);
+                            ctx.BezierTo(new Point(s * 0.40, s * 0.40), new Point(s * 0.60, s * 0.40), new Point(s * 0.85, s * 0.55), true, false);
+                        }
+                        c2.Freeze();
+                        var c3 = new StreamGeometry();
+                        using (var ctx = c3.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.10, s * 0.72), false, false);
+                            ctx.BezierTo(new Point(s * 0.40, s * 0.62), new Point(s * 0.60, s * 0.62), new Point(s * 0.90, s * 0.78), true, false);
+                        }
+                        c3.Freeze();
+                        g.DrawGeometry(null, penPrincipal, c1);
+                        g.DrawGeometry(null, penEscuro, c2);
+                        g.DrawGeometry(null, penCinza, c3);
+                    }
+                    break;
+
+                case "CE":
+                    // Canais: tubo em perspectiva
+                    g.DrawEllipse(corClara, penPrincipal, new Point(s * 0.25, s * 0.50), s * 0.12, s * 0.25);
+                    g.DrawRectangle(corClara, null, new Rect(s * 0.25, s * 0.25, s * 0.55, s * 0.50));
+                    g.DrawLine(penPrincipal, new Point(s * 0.25, s * 0.25), new Point(s * 0.80, s * 0.25));
+                    g.DrawLine(penPrincipal, new Point(s * 0.25, s * 0.75), new Point(s * 0.80, s * 0.75));
+                    g.DrawEllipse(null, penPrincipal, new Point(s * 0.80, s * 0.50), s * 0.12, s * 0.25);
+                    break;
+
+                case "MD":
+                    // Modificar: chave/ferramenta
+                    {
+                        var chave = new StreamGeometry();
+                        using (var ctx = chave.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.70, s * 0.15), true, true);
+                            ctx.LineTo(new Point(s * 0.88, s * 0.32), true, false);
+                            ctx.LineTo(new Point(s * 0.72, s * 0.48), true, false);
+                            ctx.LineTo(new Point(s * 0.60, s * 0.36), true, false);
+                            ctx.LineTo(new Point(s * 0.25, s * 0.72), true, false);
+                            ctx.LineTo(new Point(s * 0.12, s * 0.85), true, false);
+                            ctx.LineTo(new Point(s * 0.22, s * 0.75), true, false);
+                            ctx.LineTo(new Point(s * 0.58, s * 0.40), true, false);
+                            ctx.LineTo(new Point(s * 0.46, s * 0.28), true, false);
+                            ctx.LineTo(new Point(s * 0.62, s * 0.12), true, false);
+                        }
+                        chave.Freeze();
+                        g.DrawGeometry(corPrincipal, null, chave);
+                    }
+                    break;
+
+                case "LB":
+                    // Label: etiqueta com linha de chamada
+                    g.DrawLine(penCinza, new Point(s * 0.10, s * 0.80), new Point(s * 0.40, s * 0.55));
+                    g.DrawRectangle(corPrincipal, null, new Rect(s * 0.40, s * 0.30, s * 0.48, s * 0.30));
+                    g.DrawLine(penEscuro, new Point(s * 0.50, s * 0.42), new Point(s * 0.82, s * 0.42));
+                    g.DrawLine(penEscuro, new Point(s * 0.50, s * 0.50), new Point(s * 0.76, s * 0.50));
+                    break;
+
+                case "DL":
+                    // Deletar: lixeira
+                    g.DrawRectangle(corClara, penPrincipal, new Rect(s * 0.25, s * 0.32, s * 0.50, s * 0.52));
+                    g.DrawRectangle(corPrincipal, null, new Rect(s * 0.20, s * 0.22, s * 0.60, s * 0.10));
+                    g.DrawLine(penEscuro, new Point(s * 0.38, s * 0.42), new Point(s * 0.38, s * 0.76));
+                    g.DrawLine(penEscuro, new Point(s * 0.50, s * 0.42), new Point(s * 0.50, s * 0.76));
+                    g.DrawLine(penEscuro, new Point(s * 0.62, s * 0.42), new Point(s * 0.62, s * 0.76));
+                    break;
+
+                case "TP":
+                    // Feature line: linha ondulada com pontos
+                    {
+                        var onda = new StreamGeometry();
+                        using (var ctx = onda.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.10, s * 0.60), false, false);
+                            ctx.BezierTo(new Point(s * 0.30, s * 0.20), new Point(s * 0.50, s * 0.80), new Point(s * 0.90, s * 0.40), true, false);
+                        }
+                        onda.Freeze();
+                        g.DrawGeometry(null, penPrincipal, onda);
+                        double r = s * 0.08;
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.10, s * 0.60), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.90, s * 0.40), r, r);
+                    }
+                    break;
+
+                default:
+                    // Fallback: disco simples
+                    g.DrawEllipse(corPrincipal, null, new Point(s * 0.5, s * 0.5), s * 0.3, s * 0.3);
+                    break;
+            }
         }
 
         private static Color ObterCorIcone(string sigla)
@@ -289,6 +608,7 @@ namespace ZagoCivil3D.Ribbon
             return sigla switch
             {
                 "AL" => Color.FromRgb(0, 120, 212),
+                "AO" => Color.FromRgb(0, 90, 180),
                 "PX" => Color.FromRgb(90, 90, 220),
                 "PP" => Color.FromRgb(0, 153, 102),
                 "TN" => Color.FromRgb(46, 139, 87),
