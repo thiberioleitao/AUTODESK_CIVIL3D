@@ -39,19 +39,6 @@ namespace ZagoCivil3D.Services
                 return resultado;
             }
 
-            ObjectId idCamadaDestino = ObterIdCamadaPorNome(
-                db,
-                transacao,
-                string.IsNullOrWhiteSpace(request.NomeCamadaDestino)
-                    ? request.NomeCamadaOrigem
-                    : request.NomeCamadaDestino);
-
-            if (idCamadaDestino == ObjectId.Null)
-            {
-                resultado.MensagensErro.Add($"Layer de destino '{request.NomeCamadaDestino}' não encontrada.");
-                return resultado;
-            }
-
             ObjectId idEstiloAlinhamento = ObterIdEstiloAlinhamento(civilDoc, request.NomeEstiloAlinhamento);
             if (idEstiloAlinhamento == ObjectId.Null)
             {
@@ -79,36 +66,19 @@ namespace ZagoCivil3D.Services
             }
 
 
-            string identificadorZona = request.IdentificadorZona.Trim();
-            string sufixoZona = string.IsNullOrWhiteSpace(identificadorZona)
-                ? string.Empty
-                : "." + identificadorZona;
-
             int numeroAtual = request.NumeroInicial;
 
             foreach (ObjectId idPolilinha in polilinhas)
             {
                 try
                 {
-                    if (transacao.GetObject(idPolilinha, OpenMode.ForRead) is not Autodesk.AutoCAD.DatabaseServices.Entity entidade)
+                    if (transacao.GetObject(idPolilinha, OpenMode.ForRead) is not Autodesk.AutoCAD.DatabaseServices.Entity)
                     {
                         resultado.MensagensErro.Add($"Entidade {idPolilinha.Handle} não pôde ser aberta.");
                         continue;
                     }
 
-                    Extents3d extentsPolilinha;
-                    try
-                    {
-                        extentsPolilinha = entidade.GeometricExtents;
-                    }
-                    catch
-                    {
-                        resultado.MensagensErro.Add(
-                            $"Não foi possível obter extents da polilinha {idPolilinha.Handle}.");
-                        continue;
-                    }
-
-                    string nomeBase = $"{request.Prefixo}{numeroAtual:00}{sufixoZona}";
+                    string nomeBase = $"{request.Prefixo}{numeroAtual:00}";
                     string nomeFinal = ObterNomeAlinhamentoUnico(civilDoc, transacao, nomeBase);
 
                     var opcoesPolilinha = new PolylineOptions
@@ -123,7 +93,7 @@ namespace ZagoCivil3D.Services
                         opcoesPolilinha,
                         nomeFinal,
                         ObjectId.Null,
-                        idCamadaDestino,
+                        idCamadaOrigem,
                         idEstiloAlinhamento,
                         idConjuntoRotulos);
 
@@ -136,10 +106,9 @@ namespace ZagoCivil3D.Services
 
                     resultado.TotalCriados++;
                     resultado.NomesCriados.Add(nomeFinal);
-                    ed.WriteMessage(
-                        $"\n[ZagoCivil3D] Alignment criado: {nomeFinal} (zona {identificadorZona})");
+                    ed.WriteMessage($"\n[ZagoCivil3D] Alignment criado: {nomeFinal}");
 
-                    numeroAtual += request.Incremento;
+                    numeroAtual += 1;
                 }
                 catch (System.Exception ex)
                 {
