@@ -1,0 +1,242 @@
+<Window x:Class="ZagoCivil3D.Views.CriarProfileViewsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Criar Profile Views"
+        Width="920"
+        Height="720"
+        MinWidth="920"
+        MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#FFF5F5F5">
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,0,0,1"
+                Padding="22,18,22,16">
+            <StackPanel>
+                <TextBlock Text="CRIAR PROFILE VIEWS"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="#FF2D2D2D" />
+                <TextBlock Text="Cria profile views para todos os alinhamentos do desenho, empilhados verticalmente a partir de uma coordenada inicial. Replica a rotina Dynamo 1.3."
+                           Margin="0,8,0,0"
+                           FontSize="13"
+                           Foreground="#FF6A6A6A"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="22,18,22,18">
+                <Border Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Ponto de insercao"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Coordenada X (Easting)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="CoordenadaXTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Coordenada X inicial" FontWeight="Bold" /><LineBreak />
+                                    Easting (X) do ponto de insercao do primeiro profile view. Os demais profile views sao empilhados verticalmente a partir deste ponto, mantendo o mesmo X.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Coordenada Y (Northing)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="CoordenadaYTextBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Coordenada Y inicial" FontWeight="Bold" /><LineBreak />
+                                    Northing (Y) do ponto de insercao do primeiro profile view. Os profile views seguintes ficam abaixo, descendo pela altura real de cada um somada ao offset adicional.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Offset adicional (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="OffsetAdicionalTextBox" Grid.Row="2" Grid.Column="2" Height="36" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Offset adicional entre profile views" FontWeight="Bold" /><LineBreak />
+                                    Espacamento vertical extra, em metros, aplicado entre profile views consecutivos. Garante que os profile views nao fiquem encostados e melhora a leitura visual. Exemplo: 50 m.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Estilos"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Estilo do profile view" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="EstiloProfileViewComboBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Estilo do profile view" FontWeight="Bold" /><LineBreak />
+                                    Estilo aplicado aos profile views criados (grid, eixos, fonte, cor, etc.).
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Conjunto de bands" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="ConjuntoBandsComboBox" Grid.Row="1" Grid.Column="2" Height="36" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Conjunto de bands" FontWeight="Bold" /><LineBreak />
+                                    Conjunto de bands (faixas de anotacao) exibidas acima/abaixo do profile view.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Nomenclatura"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Sufixo do nome do profile view" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="SufixoProfileViewTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Sufixo do nome do profile view" FontWeight="Bold" /><LineBreak />
+                                    Texto adicionado ao final do nome de cada alinhamento para formar o nome do profile view. Exemplo: alinhamento "D01-01" com sufixo "_PV" gera o profile view "D01-01_PV".
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <CheckBox x:Name="SubstituirExistentesCheckBox"
+                                  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                  Margin="0,4,0,0"
+                                  FontSize="14"
+                                  Foreground="#FF444444"
+                                  Content="Substituir profile views existentes com o mesmo nome">
+                            <CheckBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Substituir profile views existentes" FontWeight="Bold" /><LineBreak />
+                                    Quando marcado, profile views que ja existem com o mesmo nome serao apagados e recriados. Quando desmarcado, alinhamentos que ja possuem o profile view serao ignorados.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border x:Name="StatusBorder"
+                Grid.Row="2"
+                Visibility="Collapsed"
+                BorderThickness="1"
+                CornerRadius="0"
+                Padding="22,10">
+            <TextBlock x:Name="StatusTextBlock"
+                       FontSize="13"
+                       TextWrapping="Wrap" />
+        </Border>
+
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,1,0,0"
+                Padding="22,14">
+            <DockPanel LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Text="O comando cria profile views para todos os alinhamentos do desenho."
+                           FontSize="13"
+                           Foreground="#FF666666" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="CancelarButton" Width="110" Height="36" Margin="0,0,10,0" Click="AoClicarCancelar" Content="Fechar" />
+                    <Button x:Name="ConfirmarButton" Width="130" Height="36" Click="AoClicarConfirmar" Content="Executar" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

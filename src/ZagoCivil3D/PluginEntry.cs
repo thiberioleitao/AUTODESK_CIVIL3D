@@ -9,6 +9,7 @@ using ZagoCivil3D.Commands;
 [assembly: CommandClass(typeof(TerraplenagemFeatureLinesCommand))]
 [assembly: CommandClass(typeof(CriarPerfisProjetoCommand))]
 [assembly: CommandClass(typeof(CriarPerfisTerrenoCommand))]
+[assembly: CommandClass(typeof(CriarProfileViewsCommand))]
 
 namespace ZagoCivil3D;
 
