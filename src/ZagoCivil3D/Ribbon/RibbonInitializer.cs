@@ -122,7 +122,13 @@ namespace ZagoCivil3D.Ribbon
 
                 RibbonPanelSource painelCriarPerfis = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarPerfisId, "CRIAR - PERFIS");
                 AdicionarBotaoComando(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "ZAGO_CRIAR_PERFIS_DE_PROJETO ", "PP", "Cria perfis de projeto (layout profiles) para todos os alinhamentos a partir de uma superficie.");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_TN", "Perfis TN e\nTerraplenagem", "CRIAR - PERFIS > PERFIS DO TERRENO NATURAL E TERRAPLENAGEM", "TN", "Cria perfis do terreno natural e de terraplenagem (em definição).");
+                AdicionarBotaoComando(
+                    painelCriarPerfis,
+                    "ZAGO_CRIAR_PERFIL_TN",
+                    "Perfis TN e\nTerraplenagem",
+                    "ZAGO_CRIAR_PERFIS_TERRENO ",
+                    "TN",
+                    "Cria surface profiles (perfis do terreno natural e de terraplenagem) para todos os alinhamentos, a partir de uma superficie TIN. Janela modeless.");
                 AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PROFILE_VIEW", "Profile\nView", "CRIAR - PERFIS > PROFILE VIEW", "PV", "Cria profile view a partir dos perfis (em definição).");
 
                 RibbonPanelSource painelCriarCorredores = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCorredoresId, "CRIAR - CORREDORES");
