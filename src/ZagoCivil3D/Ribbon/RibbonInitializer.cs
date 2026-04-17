@@ -121,7 +121,7 @@ namespace ZagoCivil3D.Ribbon
                 AdicionarBotaoGrande(painelCriarAlinhamentos, "ZAGO_CRIAR_PONTOS_CRUZ", "Pontos nos\nCruzamentos", "CRIAR - ALINHAMENTOS > PONTOS NOS CRUZAMENTOS ENTRE ALINHAMENTOS", "PX", "Cria pontos nos cruzamentos entre alignments (em definição).");
 
                 RibbonPanelSource painelCriarPerfis = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarPerfisId, "CRIAR - PERFIS");
-                AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "CRIAR - PERFIS > PERFIS DE PROJETO A PARTIR DE ALINHAMENTOS", "PP", "Cria perfis de projeto a partir dos alignments (em definição).");
+                AdicionarBotaoComando(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "ZAGO_CRIAR_PERFIS_DE_PROJETO ", "PP", "Cria perfis de projeto (layout profiles) para todos os alinhamentos a partir de uma superficie.");
                 AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_TN", "Perfis TN e\nTerraplenagem", "CRIAR - PERFIS > PERFIS DO TERRENO NATURAL E TERRAPLENAGEM", "TN", "Cria perfis do terreno natural e de terraplenagem (em definição).");
                 AdicionarBotaoGrande(painelCriarPerfis, "ZAGO_CRIAR_PROFILE_VIEW", "Profile\nView", "CRIAR - PERFIS > PROFILE VIEW", "PV", "Cria profile view a partir dos perfis (em definição).");
 
