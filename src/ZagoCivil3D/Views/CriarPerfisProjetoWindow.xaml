@@ -1,0 +1,280 @@
+<Window x:Class="ZagoCivil3D.Views.CriarPerfisProjetoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Criar Perfis de Projeto"
+        Width="920"
+        Height="720"
+        MinWidth="920"
+        MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#FFF5F5F5">
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,0,0,1"
+                Padding="22,18,22,16">
+            <StackPanel>
+                <TextBlock Text="CRIAR PERFIS DE PROJETO"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="#FF2D2D2D" />
+                <TextBlock Text="Cria perfis de projeto (layout profiles) para todos os alinhamentos do desenho, com base em uma superficie de terreno. Replica a rotina Dynamo de tracado automatico de perfis."
+                           Margin="0,8,0,0"
+                           FontSize="13"
+                           Foreground="#FF6A6A6A"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="22,18,22,18">
+                <Border Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Selecao"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Superficie" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="SuperficieComboBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Superficie TIN" FontWeight="Bold" /><LineBreak />
+                                    Superficie utilizada para amostrar as elevacoes do terreno ao longo de cada alinhamento. Normalmente e a superficie de projeto apos a terraplenagem.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Estilo de perfil" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="EstiloPerfilComboBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Estilo de perfil" FontWeight="Bold" /><LineBreak />
+                                    Estilo visual aplicado aos perfis de projeto criados (cor, tipo de linha, etc.).
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Conjunto de rotulos" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="ConjuntoRotulosComboBox" Grid.Row="2" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Conjunto de rotulos" FontWeight="Bold" /><LineBreak />
+                                    Conjunto de rotulos (labels) exibidos ao longo do perfil, como estacoes, cotas e declividades.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,9,0,0" Text="Layer de destino" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="CamadaComboBox" Grid.Row="3" Grid.Column="2" Height="36" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Layer de destino" FontWeight="Bold" /><LineBreak />
+                                    Layer onde os perfis de projeto serao criados.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Parametros"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Espacamento entre estacoes (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="EspacamentoEstacasTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Espacamento entre estacoes" FontWeight="Bold" /><LineBreak />
+                                    Distancia em metros entre cada ponto amostrado ao longo do alinhamento. Valores menores geram perfis mais detalhados, porem com mais PVIs. Exemplo: 10 m.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Offset abaixo do terreno (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="OffsetAbaixoTerrenoTextBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Offset abaixo do terreno" FontWeight="Bold" /><LineBreak />
+                                    Valor em metros subtraido da cota do terreno para definir a cota inicial do perfil de projeto. Usado para garantir que o perfil fique abaixo da superficie. Se igual a zero, o perfil acompanha a cota exata do terreno.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Declividade minima (m/m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="DeclivedadeMinimaTextBox" Grid.Row="2" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Declividade minima (m/m)" FontWeight="Bold" /><LineBreak />
+                                    Declividade minima admissivel para o perfil de projeto, em metros por metro (m/m). Garante que o perfil mantenha uma inclinacao minima entre pontos consecutivos. Exemplo: 0.002 equivale a 0,2%.<LineBreak /><LineBreak />
+                                    Se igual a zero, o perfil acompanha o terreno livremente, podendo subir ou descer sem restricao de declividade.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,9,0,0" Text="Limite de variacao de declividade (m/m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="LimiteVariacaoTextBox" Grid.Row="3" Grid.Column="2" Height="36" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Limite de variacao de declividade (m/m)" FontWeight="Bold" /><LineBreak />
+                                    Variacao admissivel de declividade entre dois trechos consecutivos do perfil, em metros por metro (m/m). Quando a diferenca de declividade entre dois segmentos adjacentes for menor que este valor, o ponto intermediario (PI) e removido, simplificando o perfil.<LineBreak /><LineBreak />
+                                    Exemplo: com valor 0.050, se um trecho tem declividade 0.010 e o seguinte 0.045, a variacao e 0.035 (menor que 0.050), entao o PI entre eles e removido.<LineBreak /><LineBreak />
+                                    Se igual a zero, nenhum PI e removido e todas as variacoes de declividade sao mantidas no perfil.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Nomenclatura"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Sufixo do nome do perfil" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="SufixoPerfilTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Sufixo do nome do perfil" FontWeight="Bold" /><LineBreak />
+                                    Texto adicionado ao final do nome de cada alinhamento para formar o nome do perfil. Exemplo: alinhamento "D01-01" com sufixo "_PROJETO" gera o perfil "D01-01_PROJETO".
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <CheckBox x:Name="SubstituirPerfisCheckBox"
+                                  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                  Margin="0,4,0,0"
+                                  FontSize="14"
+                                  Foreground="#FF444444"
+                                  Content="Substituir perfis existentes com o mesmo nome">
+                            <CheckBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Substituir perfis existentes" FontWeight="Bold" /><LineBreak />
+                                    Quando marcado, perfis que ja existem com o mesmo nome serao apagados e recriados. Quando desmarcado, alinhamentos que ja possuem o perfil serao ignorados.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border x:Name="StatusBorder"
+                Grid.Row="2"
+                Visibility="Collapsed"
+                BorderThickness="1"
+                CornerRadius="0"
+                Padding="22,10">
+            <TextBlock x:Name="StatusTextBlock"
+                       FontSize="13"
+                       TextWrapping="Wrap" />
+        </Border>
+
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,1,0,0"
+                Padding="22,14">
+            <DockPanel LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Text="O comando cria perfis para todos os alinhamentos do desenho."
+                           FontSize="13"
+                           Foreground="#FF666666" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="CancelarButton" Width="110" Height="36" Margin="0,0,10,0" Click="AoClicarCancelar" Content="Fechar" />
+                    <Button x:Name="ConfirmarButton" Width="130" Height="36" Click="AoClicarConfirmar" Content="Executar" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
