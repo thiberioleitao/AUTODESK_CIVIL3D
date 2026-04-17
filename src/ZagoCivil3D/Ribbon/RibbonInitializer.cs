@@ -151,7 +151,13 @@ namespace ZagoCivil3D.Ribbon
                 AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_CANAIS", "CSV Canais\ne Bueiros", "EXPORTAR > CSV CANAIS E BUEIROS", "CE", "Exporta CSV com dados de canais e bueiros (em definição).");
 
                 RibbonPanelSource painelModificar = ObterOuCriarPainelFonte(abaDrenagem, m_panelModificarId, "MODIFICAR");
-                AdicionarBotaoGrande(painelModificar, "ZAGO_MODIFICAR_DUMMY", "Modificar\n(Dummy)", "MODIFICAR > FUNCOES EM DEFINICAO", "MD", "Funções de modificação (em definição).");
+                AdicionarBotaoComando(
+                    painelModificar,
+                    "ZAGO_MUDAR_LABEL_SET_ALINH",
+                    "Mudar Label Set\nAlinhamentos",
+                    "ZAGO_MUDAR_LABEL_SET_ALINHAMENTOS ",
+                    "LS",
+                    "Aplica um Alignment Label Set Style a todos os alinhamentos do desenho, opcionalmente apagando os labels existentes antes. Janela modeless.");
 
                 RibbonPanelSource painelAnotar = ObterOuCriarPainelFonte(abaDrenagem, m_panelAnotarId, "ANOTAR");
                 AdicionarBotaoGrande(painelAnotar, "ZAGO_ANOTAR_LABELS_CORR", "Labels\nCorredores", "ANOTAR > ADICIONAR LABELS DOS TRECHOS/REGIOES DOS CORREDORES EM PLANTA", "LB", "Adiciona labels dos trechos/regiões dos corredores em planta (em definição).");
@@ -591,6 +597,32 @@ namespace ZagoCivil3D.Ribbon
                     g.DrawLine(penEscuro, new Point(s * 0.62, s * 0.42), new Point(s * 0.62, s * 0.76));
                     break;
 
+                case "LS":
+                    // Label Set: polilinha de alignment com etiquetas de estacao
+                    {
+                        // Alinhamento base (mesma silhueta do AL para coerencia visual)
+                        var polilinha = new StreamGeometry();
+                        using (var ctx = polilinha.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.10, s * 0.70), false, false);
+                            ctx.LineTo(new Point(s * 0.35, s * 0.50), true, false);
+                            ctx.LineTo(new Point(s * 0.60, s * 0.60), true, false);
+                            ctx.LineTo(new Point(s * 0.90, s * 0.30), true, false);
+                        }
+                        polilinha.Freeze();
+                        g.DrawGeometry(null, penEscuro, polilinha);
+
+                        // Tick marks (estacoes) perpendiculares ao alinhamento
+                        g.DrawLine(penPrincipal, new Point(s * 0.22, s * 0.54), new Point(s * 0.30, s * 0.70));
+                        g.DrawLine(penPrincipal, new Point(s * 0.48, s * 0.49), new Point(s * 0.50, s * 0.67));
+                        g.DrawLine(penPrincipal, new Point(s * 0.72, s * 0.40), new Point(s * 0.80, s * 0.56));
+
+                        // Etiqueta (caixa) representando o label
+                        g.DrawRectangle(corPrincipal, null, new Rect(s * 0.55, s * 0.08, s * 0.35, s * 0.16));
+                        g.DrawLine(penCinza, new Point(s * 0.60, s * 0.16), new Point(s * 0.82, s * 0.16));
+                    }
+                    break;
+
                 case "TP":
                     // Feature line: linha ondulada com pontos
                     {
@@ -631,6 +663,7 @@ namespace ZagoCivil3D.Ribbon
                 "SB" => Color.FromRgb(220, 20, 60),
                 "CE" => Color.FromRgb(178, 34, 34),
                 "MD" => Color.FromRgb(255, 140, 0),
+                "LS" => Color.FromRgb(255, 140, 0),
                 "LB" => Color.FromRgb(72, 61, 139),
                 "DL" => Color.FromRgb(169, 0, 0),
                 "TP" => Color.FromRgb(105, 105, 105),
