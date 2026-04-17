@@ -10,6 +10,7 @@ using ZagoCivil3D.Commands;
 [assembly: CommandClass(typeof(CriarPerfisProjetoCommand))]
 [assembly: CommandClass(typeof(CriarPerfisTerrenoCommand))]
 [assembly: CommandClass(typeof(CriarProfileViewsCommand))]
+[assembly: CommandClass(typeof(MudarLabelSetAlinhamentosCommand))]
 
 namespace ZagoCivil3D;
 
