@@ -177,6 +177,13 @@ namespace ZagoCivil3D.Ribbon
                     "ZAGO_TERRAPLENAGEM_FEATURE_LINES_SEPARADAS ",
                     "TP",
                     "Cria feature lines separadas a partir de polilinhas de terraplenagem.");
+                AdicionarBotaoComando(
+                    painelFeatureLinesTerraplenagem,
+                    "ZAGO_TERRAPL_AJUSTAR_DEFLEXAO",
+                    "Ajustar\nDeflexao",
+                    "ZAGO_AJUSTAR_DEFLEXAO_FEATURE_LINES ",
+                    "DF",
+                    "Ajusta iterativamente as cotas dos PI points das feature lines ate que a deflexao entre segmentos adjacentes fique dentro do limite. Duas passadas (montante->jusante e jusante->montante). Janela modeless.");
 
                 documento?.Editor.WriteMessage("\n[ZagoCivil3D] Aba e botão criados com sucesso.");
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Aba ativa: {ribbon.ActiveTab?.Id ?? "(nenhuma)"}");
@@ -640,6 +647,39 @@ namespace ZagoCivil3D.Ribbon
                     }
                     break;
 
+                case "DF":
+                    // Deflexao: tres pontos com segmentos formando angulo no ponto central.
+                    // O vertice central aparece destacado em corPrincipal (o ponto ajustado).
+                    {
+                        var pontoEsq = new Point(s * 0.12, s * 0.70);
+                        var pontoMeio = new Point(s * 0.50, s * 0.30);
+                        var pontoDir = new Point(s * 0.88, s * 0.62);
+
+                        // Segmentos adjacentes que formam a deflexao
+                        var segmentos = new StreamGeometry();
+                        using (var ctx = segmentos.Open())
+                        {
+                            ctx.BeginFigure(pontoEsq, false, false);
+                            ctx.LineTo(pontoMeio, true, false);
+                            ctx.LineTo(pontoDir, true, false);
+                        }
+                        segmentos.Freeze();
+                        g.DrawGeometry(null, penPrincipal, segmentos);
+
+                        // Linha horizontal pontilhada indicando "sem deflexao"
+                        var penTracejada = new Pen(corCinza, linhaFina) { DashStyle = new DashStyle(new double[] { 2, 2 }, 0) };
+                        penTracejada.Freeze();
+                        g.DrawLine(penTracejada, new Point(s * 0.12, s * 0.30), new Point(s * 0.88, s * 0.30));
+
+                        // Pontos nos extremos e, destacado, no vertice central
+                        double rLateral = s * 0.06;
+                        double rCentro = s * 0.10;
+                        g.DrawEllipse(corEscura, null, pontoEsq, rLateral, rLateral);
+                        g.DrawEllipse(corEscura, null, pontoDir, rLateral, rLateral);
+                        g.DrawEllipse(corPrincipal, null, pontoMeio, rCentro, rCentro);
+                    }
+                    break;
+
                 default:
                     // Fallback: disco simples
                     g.DrawEllipse(corPrincipal, null, new Point(s * 0.5, s * 0.5), s * 0.3, s * 0.3);
@@ -667,6 +707,7 @@ namespace ZagoCivil3D.Ribbon
                 "LB" => Color.FromRgb(72, 61, 139),
                 "DL" => Color.FromRgb(169, 0, 0),
                 "TP" => Color.FromRgb(105, 105, 105),
+                "DF" => Color.FromRgb(180, 110, 40),
                 _ => Color.FromRgb(96, 96, 96)
             };
         }
