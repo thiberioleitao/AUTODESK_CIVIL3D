@@ -147,7 +147,13 @@ namespace ZagoCivil3D.Ribbon
                     "Cria um corredor vazio para cada alinhamento do desenho, com nome derivado do alinhamento (prefixo e sufixo opcionais). Janela modeless.");
 
                 RibbonPanelSource painelCriarRegioes = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarRegioesId, "CRIAR - REGIOES");
-                AdicionarBotaoGrande(painelCriarRegioes, "ZAGO_CRIAR_REGIOES", "Criar\nRegioes", "CRIAR - REGIOES > FUNCOES DE CRIACAO DE REGIOES", "RG", "Funções de criação de regiões (em definição).");
+                AdicionarBotaoComando(
+                    painelCriarRegioes,
+                    "ZAGO_CRIAR_REGIOES_CORREDORES",
+                    "Regioes a partir\nde Corredores",
+                    "ZAGO_CRIAR_REGIOES_CORREDORES ",
+                    "RG",
+                    "Quebra cada baseline de cada corredor em regioes, usando cruzamentos com outros alinhamentos, mudancas bruscas de direcao horizontal e mudancas de declividade no perfil como criterios. Apaga regioes existentes antes de recriar. Janela modeless.");
 
                 RibbonPanelSource painelCriarCaixas = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCaixasId, "CRIAR - CAIXAS");
                 AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS", "CX", "Funções de criação de caixas de drenagem (em definição).");

@@ -1,0 +1,312 @@
+<Window x:Class="ZagoCivil3D.Views.CriarRegioesCorredoresWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Criar Regioes a partir de Corredores"
+        Width="980"
+        Height="820"
+        MinWidth="980"
+        MinHeight="820"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#FFF5F5F5">
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,0,0,1"
+                Padding="22,18,22,16">
+            <StackPanel>
+                <TextBlock Text="CRIAR REGIOES A PARTIR DE CORREDORES"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="#FF2D2D2D" />
+                <TextBlock Text="Para cada baseline de cada corredor do desenho, quebra o traçado em regioes usando tres criterios: cruzamentos com outros alinhamentos, mudancas bruscas de direcao horizontal e mudancas de declividade no perfil de projeto. As regioes existentes sao apagadas antes da recriacao."
+                           Margin="0,8,0,0"
+                           FontSize="13"
+                           Foreground="#FF6A6A6A"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="22,18,22,18">
+
+                <!-- Assembly -->
+                <Border Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Assembly" FontSize="14" FontWeight="SemiBold" Foreground="#FF555555" />
+                </Border>
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Margin="0,9,0,0" Text="Assembly a usar" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="AssemblyComboBox" Grid.Column="2" Height="36" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Assembly" FontWeight="Bold" /><LineBreak />
+                                    Assembly generico que sera aplicado em todas as regioes criadas. Digite para filtrar a lista.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- Criterios de quebra -->
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Criterios de quebra de regioes" FontSize="14" FontWeight="SemiBold" Foreground="#FF555555" />
+                </Border>
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="380" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Limite angulo de direcao (graus)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="AnguloDirecaoTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Limite de mudanca de direcao" FontWeight="Bold" /><LineBreak />
+                                    Em graus. Apenas PIs cuja deflexao supera esse valor viram ponto de quebra. Padrao 60.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Variacao admissivel de declividade" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="VariacaoDeclividadeTextBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Variacao de declividade" FontWeight="Bold" /><LineBreak />
+                                    |GradeOut - GradeIn| minimo em cada PVI para gerar quebra de regiao. Adimensional (ex.: 0.05 = 5%). Padrao 0.05.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Espacamento min. entre criticos declividade (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="EspDeclividadeTextBox" Grid.Row="2" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Espacamento minimo entre PVIs criticos" FontWeight="Bold" /><LineBreak />
+                                    Evita regioes muito pequenas quando varios PVIs proximos geram deflexao. Padrao 50 m.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,9,0,0" Text="Espacamento min. vs cruzamentos (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="EspCruzamentosTextBox" Grid.Row="3" Grid.Column="2" Height="36" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Espacamento minimo vs cruzamentos" FontWeight="Bold" /><LineBreak />
+                                    Pontos criticos (direcao/declividade) a menos que esse valor de um cruzamento sao descartados. Padrao 50 m.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <!-- Frequencia horizontal -->
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Frequencia horizontal" FontSize="14" FontWeight="SemiBold" Foreground="#FF555555" />
+                </Border>
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="380" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Frequencia tangente (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="FreqTangenteTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Incremento em curvas (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="IncCurvaHTextBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Distancia mid-ordinate (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="MidOrdTextBox" Grid.Row="2" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,9,0,0" Text="Frequencia em espirais (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="FreqEspiralTextBox" Grid.Row="3" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14" />
+
+                        <CheckBox x:Name="HorizGeomPointsCheckBox" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,8,0,6"
+                                  FontSize="14" Foreground="#FF444444" IsChecked="True"
+                                  Content="Inserir nos geometry points do alinhamento" />
+
+                        <CheckBox x:Name="SuperelevPointsCheckBox" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,0"
+                                  FontSize="14" Foreground="#FF444444" IsChecked="True"
+                                  Content="Inserir em pontos criticos de superelevacao" />
+                    </Grid>
+                </Border>
+
+                <!-- Frequencia vertical -->
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Frequencia vertical" FontSize="14" FontWeight="SemiBold" Foreground="#FF555555" />
+                </Border>
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="380" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Frequencia em curvas verticais (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="FreqCurvaVTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14" />
+
+                        <CheckBox x:Name="VertGeomPointsCheckBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,8,0,6"
+                                  FontSize="14" Foreground="#FF444444" IsChecked="True"
+                                  Content="Inserir em geometry points do perfil" />
+
+                        <CheckBox x:Name="HighLowPointsCheckBox" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                  FontSize="14" Foreground="#FF444444" IsChecked="True"
+                                  Content="Inserir em pontos de minimo/maximo do perfil" />
+                    </Grid>
+                </Border>
+
+                <!-- Frequencia offset target -->
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Frequencia em offset targets" FontSize="14" FontWeight="SemiBold" Foreground="#FF555555" />
+                </Border>
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="380" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Incremento em curvas (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="IncCurvaOffsetTextBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Distancia mid-ordinate offset (m)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="MidOrdOffsetTextBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,10" Padding="8,4" FontSize="14" />
+
+                        <CheckBox x:Name="OffsetGeomPointsCheckBox" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,8,0,6"
+                                  FontSize="14" Foreground="#FF444444" IsChecked="True"
+                                  Content="Inserir em geometry points dos offset targets" />
+
+                        <CheckBox x:Name="OffsetAdjStartEndCheckBox" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                                  FontSize="14" Foreground="#FF444444" IsChecked="True"
+                                  Content="Inserir adjacente ao start/end do offset target" />
+                    </Grid>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border x:Name="StatusBorder"
+                Grid.Row="2"
+                Visibility="Collapsed"
+                BorderThickness="1"
+                CornerRadius="0"
+                Padding="22,10">
+            <TextBlock x:Name="StatusTextBlock"
+                       FontSize="13"
+                       TextWrapping="Wrap" />
+        </Border>
+
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,1,0,0"
+                Padding="22,14">
+            <DockPanel LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Text="Apaga e recria regioes em todos os corredores do desenho."
+                           FontSize="13"
+                           Foreground="#FF666666" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="CancelarButton" Width="110" Height="36" Margin="0,0,10,0" Click="AoClicarCancelar" Content="Fechar" />
+                    <Button x:Name="ConfirmarButton" Width="130" Height="36" Click="AoClicarConfirmar" Content="Executar" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
