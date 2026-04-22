@@ -138,7 +138,13 @@ namespace ZagoCivil3D.Ribbon
                     "Cria profile views para todos os alinhamentos, empilhados verticalmente a partir de uma coordenada inicial. Janela modeless.");
 
                 RibbonPanelSource painelCriarCorredores = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCorredoresId, "CRIAR - CORREDORES");
-                AdicionarBotaoGrande(painelCriarCorredores, "ZAGO_CRIAR_CORREDORES", "Criar\nCorredores", "CRIAR - CORREDORES > FUNCOES DE CRIACAO DE CORREDORES", "CO", "Funções de criação de corredores (em definição).");
+                AdicionarBotaoComando(
+                    painelCriarCorredores,
+                    "ZAGO_CRIAR_CORRED_POR_ALINH",
+                    "Por\nAlinhamentos",
+                    "ZAGO_CRIAR_CORREDORES_POR_ALINHAMENTOS ",
+                    "CA",
+                    "Cria um corredor vazio para cada alinhamento do desenho, com nome derivado do alinhamento (prefixo e sufixo opcionais). Janela modeless.");
 
                 RibbonPanelSource painelCriarRegioes = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarRegioesId, "CRIAR - REGIOES");
                 AdicionarBotaoGrande(painelCriarRegioes, "ZAGO_CRIAR_REGIOES", "Criar\nRegioes", "CRIAR - REGIOES > FUNCOES DE CRIACAO DE REGIOES", "RG", "Funções de criação de regiões (em definição).");
@@ -475,6 +481,43 @@ namespace ZagoCivil3D.Ribbon
                     }
                     break;
 
+                case "CA":
+                    // Corredor a partir de alinhamento: polilinha (eixo) com pontos
+                    // nos vertices e uma linha paralela de corredor por baixo.
+                    {
+                        // Linha paralela inferior (faixa do corredor)
+                        var paralela = new StreamGeometry();
+                        using (var ctx = paralela.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.12, s * 0.80), false, false);
+                            ctx.LineTo(new Point(s * 0.35, s * 0.55), true, false);
+                            ctx.LineTo(new Point(s * 0.60, s * 0.70), true, false);
+                            ctx.LineTo(new Point(s * 0.88, s * 0.32), true, false);
+                        }
+                        paralela.Freeze();
+                        g.DrawGeometry(null, penEscuro, paralela);
+
+                        // Linha principal (alinhamento / eixo do corredor)
+                        var eixo = new StreamGeometry();
+                        using (var ctx = eixo.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.12, s * 0.60), false, false);
+                            ctx.LineTo(new Point(s * 0.35, s * 0.35), true, false);
+                            ctx.LineTo(new Point(s * 0.60, s * 0.50), true, false);
+                            ctx.LineTo(new Point(s * 0.88, s * 0.12), true, false);
+                        }
+                        eixo.Freeze();
+                        g.DrawGeometry(null, penPrincipal, eixo);
+
+                        // Pontos nos vertices do alinhamento
+                        double r = s * 0.075;
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.12, s * 0.60), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.35, s * 0.35), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.60, s * 0.50), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.88, s * 0.12), r, r);
+                    }
+                    break;
+
                 case "CO":
                     // Corredor: duas curvas paralelas com hachura central
                     {
@@ -698,6 +741,7 @@ namespace ZagoCivil3D.Ribbon
                 "TN" => Color.FromRgb(46, 139, 87),
                 "PV" => Color.FromRgb(0, 153, 153),
                 "CO" => Color.FromRgb(128, 0, 128),
+                "CA" => Color.FromRgb(128, 0, 128),
                 "RG" => Color.FromRgb(184, 134, 11),
                 "CX" => Color.FromRgb(210, 105, 30),
                 "SB" => Color.FromRgb(220, 20, 60),

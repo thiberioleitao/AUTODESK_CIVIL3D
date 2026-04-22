@@ -12,6 +12,7 @@ using ZagoCivil3D.Commands;
 [assembly: CommandClass(typeof(CriarProfileViewsCommand))]
 [assembly: CommandClass(typeof(MudarLabelSetAlinhamentosCommand))]
 [assembly: CommandClass(typeof(AjustarDeflexaoFeatureLinesCommand))]
+[assembly: CommandClass(typeof(CriarCorredoresAlinhamentosCommand))]
 
 namespace ZagoCivil3D;
 
