@@ -15,6 +15,7 @@ using ZagoCivil3D.Commands;
 [assembly: CommandClass(typeof(CriarCorredoresAlinhamentosCommand))]
 [assembly: CommandClass(typeof(CriarRegioesCorredoresCommand))]
 [assembly: CommandClass(typeof(CriarCatchmentsDeHatchsCommand))]
+[assembly: CommandClass(typeof(CriarTalveguesCatchmentsCommand))]
 
 namespace ZagoCivil3D;
 
