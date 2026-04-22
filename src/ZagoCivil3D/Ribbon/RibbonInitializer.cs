@@ -23,6 +23,7 @@ namespace ZagoCivil3D.Ribbon
         private const string m_panelCriarPerfisId = "ZAGO_DRENAGEM_CRIAR_PERFIS_PANEL";
         private const string m_panelCriarCorredoresId = "ZAGO_DRENAGEM_CRIAR_CORREDORES_PANEL";
         private const string m_panelCriarRegioesId = "ZAGO_DRENAGEM_CRIAR_REGIOES_PANEL";
+        private const string m_panelCriarBaciasId = "ZAGO_DRENAGEM_CRIAR_BACIAS_PANEL";
         private const string m_panelCriarCaixasId = "ZAGO_DRENAGEM_CRIAR_CAIXAS_PANEL";
         private const string m_panelExportarId = "ZAGO_DRENAGEM_EXPORTAR_PANEL";
         private const string m_panelModificarId = "ZAGO_DRENAGEM_MODIFICAR_PANEL";
@@ -154,6 +155,15 @@ namespace ZagoCivil3D.Ribbon
                     "ZAGO_CRIAR_REGIOES_CORREDORES ",
                     "RG",
                     "Quebra cada baseline de cada corredor em regioes, usando cruzamentos com outros alinhamentos, mudancas bruscas de direcao horizontal e mudancas de declividade no perfil como criterios. Apaga regioes existentes antes de recriar. Janela modeless.");
+
+                RibbonPanelSource painelCriarBacias = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarBaciasId, "CRIAR - BACIAS");
+                AdicionarBotaoComando(
+                    painelCriarBacias,
+                    "ZAGO_CRIAR_CATCHMENTS_HATCHS",
+                    "Catchments\nde Hatches",
+                    "ZAGO_CRIAR_CATCHMENTS_DE_HATCHS ",
+                    "BC",
+                    "Cria catchments (subbacias) a partir das hatches de uma layer, associando o MText de ID e a polilinha de talvegue contidos em cada hatch. O talvegue vira flow path do catchment. Janela modeless.");
 
                 RibbonPanelSource painelCriarCaixas = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCaixasId, "CRIAR - CAIXAS");
                 AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS", "CX", "Funções de criação de caixas de drenagem (em definição).");
@@ -696,6 +706,42 @@ namespace ZagoCivil3D.Ribbon
                     }
                     break;
 
+                case "BC":
+                    // Bacia (catchment) a partir de hatch: contorno fechado irregular preenchido,
+                    // com uma polilinha interna (talvegue/flow path) saindo de um ponto para o outro.
+                    {
+                        var contorno = new StreamGeometry();
+                        using (var ctx = contorno.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.14, s * 0.30), true, true);
+                            ctx.LineTo(new Point(s * 0.40, s * 0.12), true, false);
+                            ctx.LineTo(new Point(s * 0.72, s * 0.18), true, false);
+                            ctx.LineTo(new Point(s * 0.90, s * 0.42), true, false);
+                            ctx.LineTo(new Point(s * 0.82, s * 0.74), true, false);
+                            ctx.LineTo(new Point(s * 0.50, s * 0.90), true, false);
+                            ctx.LineTo(new Point(s * 0.20, s * 0.76), true, false);
+                            ctx.LineTo(new Point(s * 0.10, s * 0.54), true, false);
+                        }
+                        contorno.Freeze();
+                        g.DrawGeometry(corClara, penPrincipal, contorno);
+
+                        // Talvegue (flow path) ziguezagueando de um extremo ao outro da bacia.
+                        var talvegue = new StreamGeometry();
+                        using (var ctx = talvegue.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.32, s * 0.28), false, false);
+                            ctx.LineTo(new Point(s * 0.48, s * 0.46), true, false);
+                            ctx.LineTo(new Point(s * 0.40, s * 0.62), true, false);
+                            ctx.LineTo(new Point(s * 0.62, s * 0.78), true, false);
+                        }
+                        talvegue.Freeze();
+                        g.DrawGeometry(null, penEscuro, talvegue);
+
+                        // Ponto de descarga (ponta da flow path).
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.62, s * 0.78), s * 0.08, s * 0.08);
+                    }
+                    break;
+
                 case "DF":
                     // Deflexao: tres pontos com segmentos formando angulo no ponto central.
                     // O vertice central aparece destacado em corPrincipal (o ponto ajustado).
@@ -758,6 +804,7 @@ namespace ZagoCivil3D.Ribbon
                 "DL" => Color.FromRgb(169, 0, 0),
                 "TP" => Color.FromRgb(105, 105, 105),
                 "DF" => Color.FromRgb(180, 110, 40),
+                "BC" => Color.FromRgb(30, 144, 180),
                 _ => Color.FromRgb(96, 96, 96)
             };
         }

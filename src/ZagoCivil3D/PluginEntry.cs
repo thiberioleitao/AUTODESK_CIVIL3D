@@ -14,6 +14,7 @@ using ZagoCivil3D.Commands;
 [assembly: CommandClass(typeof(AjustarDeflexaoFeatureLinesCommand))]
 [assembly: CommandClass(typeof(CriarCorredoresAlinhamentosCommand))]
 [assembly: CommandClass(typeof(CriarRegioesCorredoresCommand))]
+[assembly: CommandClass(typeof(CriarCatchmentsDeHatchsCommand))]
 
 namespace ZagoCivil3D;
 
