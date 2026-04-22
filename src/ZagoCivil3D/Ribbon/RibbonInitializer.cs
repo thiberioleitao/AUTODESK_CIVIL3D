@@ -164,6 +164,13 @@ namespace ZagoCivil3D.Ribbon
                     "ZAGO_CRIAR_CATCHMENTS_DE_HATCHS ",
                     "BC",
                     "Cria catchments (subbacias) a partir das hatches de uma layer, associando o MText de ID e a polilinha de talvegue contidos em cada hatch. O talvegue vira flow path do catchment. Janela modeless.");
+                AdicionarBotaoComando(
+                    painelCriarBacias,
+                    "ZAGO_CRIAR_TALVEGUES_CATCH",
+                    "Talvegues dos\nCatchments",
+                    "ZAGO_CRIAR_TALVEGUES_CATCHMENTS ",
+                    "TC",
+                    "Define o FlowPath dos catchments existentes a partir das polilinhas desenhadas em uma layer (padrao ZAGO: HDR-TALVEGUES SUBBACIAS). Cada polyline vira o talvegue do catchment que a contem. Janela modeless.");
 
                 RibbonPanelSource painelCriarCaixas = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCaixasId, "CRIAR - CAIXAS");
                 AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS", "CX", "Funções de criação de caixas de drenagem (em definição).");
@@ -742,6 +749,42 @@ namespace ZagoCivil3D.Ribbon
                     }
                     break;
 
+                case "TC":
+                    // Talvegue dentro do catchment:
+                    // - poligono curvo preenchido representa a subbacia (boundary do catchment)
+                    // - polilinha em ziguezague descendente marcada por pontos representa o talvegue (FlowPath)
+                    {
+                        var poligono = new StreamGeometry();
+                        using (var ctx = poligono.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.15, s * 0.30), true, true);
+                            ctx.LineTo(new Point(s * 0.55, s * 0.12), true, false);
+                            ctx.LineTo(new Point(s * 0.88, s * 0.35), true, false);
+                            ctx.LineTo(new Point(s * 0.82, s * 0.82), true, false);
+                            ctx.LineTo(new Point(s * 0.35, s * 0.90), true, false);
+                            ctx.LineTo(new Point(s * 0.10, s * 0.62), true, false);
+                        }
+                        poligono.Freeze();
+                        g.DrawGeometry(corClara, penEscuro, poligono);
+
+                        // Talvegue (FlowPath): linha em ziguezague descendente com pontos nos vertices
+                        var talvegue = new StreamGeometry();
+                        using (var ctx = talvegue.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.28, s * 0.30), false, false);
+                            ctx.LineTo(new Point(s * 0.42, s * 0.48), true, false);
+                            ctx.LineTo(new Point(s * 0.58, s * 0.55), true, false);
+                            ctx.LineTo(new Point(s * 0.72, s * 0.78), true, false);
+                        }
+                        talvegue.Freeze();
+                        g.DrawGeometry(null, penPrincipal, talvegue);
+
+                        double r = s * 0.07;
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.28, s * 0.30), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.72, s * 0.78), r, r);
+                    }
+                    break;
+
                 case "DF":
                     // Deflexao: tres pontos com segmentos formando angulo no ponto central.
                     // O vertice central aparece destacado em corPrincipal (o ponto ajustado).
@@ -805,6 +848,7 @@ namespace ZagoCivil3D.Ribbon
                 "TP" => Color.FromRgb(105, 105, 105),
                 "DF" => Color.FromRgb(180, 110, 40),
                 "BC" => Color.FromRgb(30, 144, 180),
+                "TC" => Color.FromRgb(30, 110, 150),
                 _ => Color.FromRgb(96, 96, 96)
             };
         }
