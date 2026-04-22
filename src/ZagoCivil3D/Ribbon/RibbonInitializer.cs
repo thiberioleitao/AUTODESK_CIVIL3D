@@ -117,9 +117,13 @@ namespace ZagoCivil3D.Ribbon
                     "ZAGO_CRIAR_ALINHAMENTOS_ORDENADOS ",
                     "AO",
                     "Cria alignments a partir de dois layers: primeiro as polilinhas horizontais (ordenadas Norte→Sul), em seguida as verticais (ordenadas Oeste→Leste), com numeração sequencial. Janela modeless.");
-                AdicionarBotaoGrande(painelCriarAlinhamentos, "ZAGO_CRIAR_PONTOS_CRUZ", "Pontos nos\nCruzamentos", "CRIAR - ALINHAMENTOS > PONTOS NOS CRUZAMENTOS ENTRE ALINHAMENTOS", "PX");
-
-                AdicionarBotaoGrande(painelCriarAlinhamentos, "ZAGO_CRIAR_PONTOS_CRUZ", "Pontos nos\nCruzamentos", "CRIAR - ALINHAMENTOS > PONTOS NOS CRUZAMENTOS ENTRE ALINHAMENTOS", "PX", "Cria pontos nos cruzamentos entre alignments (em definição).");
+                AdicionarBotaoComando(
+                    painelCriarAlinhamentos,
+                    "ZAGO_CRIAR_PONTOS_CRUZ",
+                    "Pontos nos\nCruzamentos",
+                    "ZAGO_CRIAR_PONTOS_CRUZAMENTOS_ALINHAMENTOS ",
+                    "PX",
+                    "Cria CogoPoints nos cruzamentos entre alinhamentos, organizados em blocos (trackers) com rotulos sequenciais. Janela modeless.");
 
                 RibbonPanelSource painelCriarPerfis = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarPerfisId, "CRIAR - PERFIS");
                 AdicionarBotaoComando(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "ZAGO_CRIAR_PERFIS_DE_PROJETO ", "PP", "Cria perfis de projeto (layout profiles) para todos os alinhamentos a partir de uma superficie.");
