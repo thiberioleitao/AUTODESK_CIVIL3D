@@ -1,0 +1,272 @@
+<Window x:Class="ZagoCivil3D.Views.CriarCatchmentsDeHatchsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Criar Catchments a partir das Hatches"
+        Width="960"
+        Height="760"
+        MinWidth="960"
+        MinHeight="760"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#FFF5F5F5">
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,0,0,1"
+                Padding="22,18,22,16">
+            <StackPanel>
+                <TextBlock Text="CRIAR CATCHMENTS A PARTIR DAS HATCHES"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="#FF2D2D2D" />
+                <TextBlock Text="Percorre as hatches de uma layer, associa cada uma a um MText (ID da subbacia) e a uma polilinha (talvegue), e cria um Catchment no Civil 3D com o contorno da hatch como boundary e o talvegue como flow path."
+                           Margin="0,8,0,0"
+                           FontSize="13"
+                           Foreground="#FF6A6A6A"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="22,18,22,18">
+                <Border Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Layers de entrada"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Layer das hatches (bacias)" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="LayerHatchesComboBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Layer das hatches" FontWeight="Bold" /><LineBreak />
+                                    Cada hatch nessa layer define o contorno de uma subbacia. O contorno externo e usado como boundary do catchment. Padrao do projeto Zago: "HDR-BACIA".
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Layer dos MTexts (IDs)" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="LayerMTextsComboBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Layer dos MTexts de identificacao" FontWeight="Bold" /><LineBreak />
+                                    Layer onde estao os MText/DBText com o identificador de cada subbacia (ex.: "01", "02"). O MText cujo ponto de insercao estiver dentro do contorno da hatch e usado para nomear o catchment. Padrao do projeto Zago: "HDR-ANOT IDS SUBBACIAS".
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Layer dos talvegues (flow path)" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="LayerTalveguesComboBox" Grid.Row="2" Grid.Column="2" Height="36" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Layer dos talvegues" FontWeight="Bold" /><LineBreak />
+                                    Layer onde estao as polilinhas de talvegue. Quando os dois extremos de uma polilinha estiverem dentro do contorno da hatch, a polilinha e usada como flow path do catchment correspondente. Deixe em branco para criar catchments sem flow path. Padrao do projeto Zago: "HDR-TALVEGUES SUBBACIAS".
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Grupo, estilo e superficie"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Nome do Catchment Group" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="GrupoCatchmentComboBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Catchment Group" FontWeight="Bold" /><LineBreak />
+                                    Grupo onde os catchments serao inseridos. Se o grupo nao existir, sera criado automaticamente. Digite para filtrar a lista dos grupos existentes no desenho.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Estilo do catchment" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="EstiloCatchmentComboBox" Grid.Row="1" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="350">
+                                    <Run Text="Catchment Style" FontWeight="Bold" /><LineBreak />
+                                    Estilo visual aplicado a cada catchment criado. Deixe em branco para usar o primeiro estilo disponivel no desenho.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,9,0,0" Text="Superficie de referencia" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="SuperficieComboBox" Grid.Row="2" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Superficie" FontWeight="Bold" /><LineBreak />
+                                    Superficie TIN de referencia do catchment, usada internamente pelo Civil 3D para calcular elevacoes ao longo do flow path e declividade media. Deixe em branco para criar sem superficie associada.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,9,0,0" Text="Prefixo da bacia" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="PrefixoBaciaTextBox" Grid.Row="3" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Prefixo da bacia" FontWeight="Bold" /><LineBreak />
+                                    Prefixo aplicado ao nome de cada catchment. O nome final fica "{prefixo}-{id_subbacia}". Ex.: prefixo "SB" e MText "01" geram o catchment "SB-01". Padrao: "SB".
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,9,0,0" Text="Separador do nome" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="SeparadorNomeTextBox" Grid.Row="4" Grid.Column="2" Height="36" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Separador entre prefixo e ID" FontWeight="Bold" /><LineBreak />
+                                    Caractere(s) inserido(s) entre o prefixo da bacia e o identificador da subbacia ao montar o nome do catchment. Padrao: "-".
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Opcoes"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <StackPanel>
+                        <CheckBox x:Name="ConfigurarFlowPathCheckBox"
+                                  FontSize="14"
+                                  Foreground="#FF444444"
+                                  IsChecked="True"
+                                  Content="Configurar flow path a partir do talvegue contido no contorno">
+                            <CheckBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Atribuir flow path" FontWeight="Bold" /><LineBreak />
+                                    Quando marcado, para cada hatch o comando procura uma polilinha da layer de talvegues cujos dois extremos estejam dentro do contorno. Essa polilinha e entao definida como flow path do catchment. Quando desmarcado, o catchment e criado apenas com a boundary.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <CheckBox x:Name="SubstituirExistentesCheckBox"
+                                  Margin="0,12,0,0"
+                                  FontSize="14"
+                                  Foreground="#FF444444"
+                                  IsChecked="True"
+                                  Content="Substituir catchments existentes com o mesmo nome">
+                            <CheckBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Substituir existentes" FontWeight="Bold" /><LineBreak />
+                                    Quando marcado, se ja existir um catchment com o mesmo nome dentro do grupo, ele sera removido antes de criar o novo. Evita erro de duplicidade e permite reexecutar a rotina apos ajustes nas hatches/talvegues.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border x:Name="StatusBorder"
+                Grid.Row="2"
+                Visibility="Collapsed"
+                BorderThickness="1"
+                CornerRadius="0"
+                Padding="22,10">
+            <TextBlock x:Name="StatusTextBlock"
+                       FontSize="13"
+                       TextWrapping="Wrap" />
+        </Border>
+
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,1,0,0"
+                Padding="22,14">
+            <DockPanel LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Text="O comando cria catchments no grupo informado a partir das hatches selecionadas."
+                           FontSize="13"
+                           Foreground="#FF666666" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="CancelarButton" Width="110" Height="36" Margin="0,0,10,0" Click="AoClicarCancelar" Content="Fechar" />
+                    <Button x:Name="ConfirmarButton" Width="130" Height="36" Click="AoClicarConfirmar" Content="Executar" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
