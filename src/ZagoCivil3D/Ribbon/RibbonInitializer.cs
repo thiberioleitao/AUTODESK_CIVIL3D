@@ -18,19 +18,16 @@ namespace ZagoCivil3D.Ribbon
     /// </summary>
     public static class RibbonInitializer
     {
-        private const string m_tabDrenagemId = "ZAGO_DRENAGEM_TAB";
-        private const string m_panelCriarAlinhamentosId = "ZAGO_DRENAGEM_CRIAR_ALINHAMENTOS_PANEL";
-        private const string m_panelCriarPerfisId = "ZAGO_DRENAGEM_CRIAR_PERFIS_PANEL";
-        private const string m_panelCriarCorredoresId = "ZAGO_DRENAGEM_CRIAR_CORREDORES_PANEL";
-        private const string m_panelCriarRegioesId = "ZAGO_DRENAGEM_CRIAR_REGIOES_PANEL";
-        private const string m_panelCriarBaciasId = "ZAGO_DRENAGEM_CRIAR_BACIAS_PANEL";
-        private const string m_panelCriarCaixasId = "ZAGO_DRENAGEM_CRIAR_CAIXAS_PANEL";
-        private const string m_panelExportarId = "ZAGO_DRENAGEM_EXPORTAR_PANEL";
-        private const string m_panelModificarId = "ZAGO_DRENAGEM_MODIFICAR_PANEL";
-        private const string m_panelAnotarId = "ZAGO_DRENAGEM_ANOTAR_PANEL";
-        private const string m_panelDeletarId = "ZAGO_DRENAGEM_DELETAR_PANEL";
-        private const string m_tabTerraplenagemId = "ZAGO_TERRAPLENAGEM_TAB";
-        private const string m_panelFeatureLinesId = "ZAGO_TERRAPLENAGEM_FEATURE_LINES_PANEL";
+        private const string m_tabId = "ZAGO_TAB";
+        private const string m_panelAlinhamentosId = "ZAGO_ALINHAMENTOS_PANEL";
+        private const string m_panelPerfisId = "ZAGO_PERFIS_PANEL";
+        private const string m_panelProfileViewsId = "ZAGO_PROFILE_VIEWS_PANEL";
+        private const string m_panelCogopointsId = "ZAGO_COGOPOINTS_PANEL";
+        private const string m_panelCorredoresId = "ZAGO_CORREDORES_PANEL";
+        private const string m_panelFeatureLinesId = "ZAGO_FEATURE_LINES_PANEL";
+        private const string m_panelBaciasId = "ZAGO_BACIAS_PANEL";
+        private const string m_panelCaixasId = "ZAGO_CAIXAS_PANEL";
+        private const string m_panelDeletarId = "ZAGO_DELETAR_PANEL";
         private const string m_prefixoComandoDummy = "DUMMY_PRINT:";
         private static bool m_aguardandoRibbon;
 
@@ -101,122 +98,250 @@ namespace ZagoCivil3D.Ribbon
                 documento?.Editor.WriteMessage("\n[ZagoCivil3D] CreateRibbon chamado.");
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Total de abas atuais: {ribbon.Tabs.Count}");
 
-                RibbonTab abaDrenagem = ObterOuCriarAba(ribbon, m_tabDrenagemId, "ZAGO - DRENAGEM");
-                RibbonPanelSource painelCriarAlinhamentos = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarAlinhamentosId, "CRIAR - ALINHAMENTOS");
-                AdicionarBotaoComando(
-                    painelCriarAlinhamentos,
+                RibbonTab aba = ObterOuCriarAba(ribbon, m_tabId, "ZAGO");
+
+                // ALINHAMENTOS (dois dropdowns lado-a-lado: Criar e Anotação)
+                RibbonPanelSource painelAlinhamentos = ObterOuCriarPainelFonte(aba, m_panelAlinhamentosId, "ALINHAMENTOS");
+
+                RibbonSplitButton dropdownCriarAlinh = CriarDropdown(
+                    painelAlinhamentos,
+                    "ZAGO_DROPDOWN_ALINH_CRIAR",
+                    "Criar",
+                    "AL",
+                    "Comandos de criação de alinhamentos.");
+                AdicionarItemDropdown(
+                    dropdownCriarAlinh,
                     "ZAGO_CRIAR_ALINH_POR_POLI",
                     "Por Polilinha",
                     "ZAGO_CRIAR_ALINHAMENTOS_POR_POLILINHA ",
                     "AL",
                     "Cria alignments a partir das polilinhas de uma layer, sem ordenação específica.");
-                AdicionarBotaoComando(
-                    painelCriarAlinhamentos,
+                AdicionarItemDropdown(
+                    dropdownCriarAlinh,
                     "ZAGO_CRIAR_ALINH_ORDENADOS",
-                    "Ordenados\nH e V",
+                    "Ordenados H e V",
                     "ZAGO_CRIAR_ALINHAMENTOS_ORDENADOS ",
                     "AO",
                     "Cria alignments a partir de dois layers: primeiro as polilinhas horizontais (ordenadas Norte→Sul), em seguida as verticais (ordenadas Oeste→Leste), com numeração sequencial. Janela modeless.");
-                AdicionarBotaoComando(
-                    painelCriarAlinhamentos,
-                    "ZAGO_CRIAR_PONTOS_CRUZ",
-                    "Pontos nos\nCruzamentos",
-                    "ZAGO_CRIAR_PONTOS_CRUZAMENTOS_ALINHAMENTOS ",
-                    "PX",
-                    "Cria CogoPoints nos cruzamentos entre alinhamentos, organizados em blocos (trackers) com rotulos sequenciais. Janela modeless.");
 
-                RibbonPanelSource painelCriarPerfis = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarPerfisId, "CRIAR - PERFIS");
-                AdicionarBotaoComando(painelCriarPerfis, "ZAGO_CRIAR_PERFIL_PROJ", "Perfis de\nProjeto", "ZAGO_CRIAR_PERFIS_DE_PROJETO ", "PP", "Cria perfis de projeto (layout profiles) para todos os alinhamentos a partir de uma superficie.");
-                AdicionarBotaoComando(
-                    painelCriarPerfis,
-                    "ZAGO_CRIAR_PERFIL_TN",
-                    "Perfis TN e\nTerraplenagem",
-                    "ZAGO_CRIAR_PERFIS_TERRENO ",
-                    "TN",
-                    "Cria surface profiles (perfis do terreno natural e de terraplenagem) para todos os alinhamentos, a partir de uma superficie TIN. Janela modeless.");
-                AdicionarBotaoComando(
-                    painelCriarPerfis,
-                    "ZAGO_CRIAR_PROFILE_VIEW",
-                    "Profile\nView",
-                    "ZAGO_CRIAR_PROFILE_VIEWS ",
-                    "PV",
-                    "Cria profile views para todos os alinhamentos, empilhados verticalmente a partir de uma coordenada inicial. Janela modeless.");
-
-                RibbonPanelSource painelCriarCorredores = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCorredoresId, "CRIAR - CORREDORES");
-                AdicionarBotaoComando(
-                    painelCriarCorredores,
-                    "ZAGO_CRIAR_CORRED_POR_ALINH",
-                    "Por\nAlinhamentos",
-                    "ZAGO_CRIAR_CORREDORES_POR_ALINHAMENTOS ",
-                    "CA",
-                    "Cria um corredor vazio para cada alinhamento do desenho, com nome derivado do alinhamento (prefixo e sufixo opcionais). Janela modeless.");
-
-                RibbonPanelSource painelCriarRegioes = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarRegioesId, "CRIAR - REGIOES");
-                AdicionarBotaoComando(
-                    painelCriarRegioes,
-                    "ZAGO_CRIAR_REGIOES_CORREDORES",
-                    "Regioes a partir\nde Corredores",
-                    "ZAGO_CRIAR_REGIOES_CORREDORES ",
-                    "RG",
-                    "Quebra cada baseline de cada corredor em regioes, usando cruzamentos com outros alinhamentos, mudancas bruscas de direcao horizontal e mudancas de declividade no perfil como criterios. Apaga regioes existentes antes de recriar. Janela modeless.");
-
-                RibbonPanelSource painelCriarBacias = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarBaciasId, "CRIAR - BACIAS");
-                AdicionarBotaoComando(
-                    painelCriarBacias,
-                    "ZAGO_CRIAR_CATCHMENTS_HATCHS",
-                    "Catchments\nde Hatches",
-                    "ZAGO_CRIAR_CATCHMENTS_DE_HATCHS ",
-                    "BC",
-                    "Cria catchments (subbacias) a partir das hatches de uma layer, associando o MText de ID e a polilinha de talvegue contidos em cada hatch. O talvegue vira flow path do catchment. Janela modeless.");
-                AdicionarBotaoComando(
-                    painelCriarBacias,
-                    "ZAGO_CRIAR_TALVEGUES_CATCH",
-                    "Talvegues dos\nCatchments",
-                    "ZAGO_CRIAR_TALVEGUES_CATCHMENTS ",
-                    "TC",
-                    "Define o FlowPath dos catchments existentes a partir das polilinhas desenhadas em uma layer (padrao ZAGO: HDR-TALVEGUES SUBBACIAS). Cada polyline vira o talvegue do catchment que a contem. Janela modeless.");
-
-                RibbonPanelSource painelCriarCaixas = ObterOuCriarPainelFonte(abaDrenagem, m_panelCriarCaixasId, "CRIAR - CAIXAS");
-                AdicionarBotaoGrande(painelCriarCaixas, "ZAGO_CRIAR_CAIXAS", "Criar\nCaixas", "CRIAR - CAIXAS > FUNCOES DE CRIACAO DE CAIXAS", "CX", "Funções de criação de caixas de drenagem (em definição).");
-
-                RibbonPanelSource painelExportar = ObterOuCriarPainelFonte(abaDrenagem, m_panelExportarId, "EXPORTAR");
-                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_BACIAS", "CSV Bacias e\nSubbacias", "EXPORTAR > CSV BACIAS/SUBBACIAS (ID, AREA, TALVEGUE, DECLIVIDADE, ID_JUSANTE)", "SB", "Exporta CSV com dados de bacias e subbacias (em definição).");
-                AdicionarBotaoGrande(painelExportar, "ZAGO_EXPORTAR_CSV_CANAIS", "CSV Canais\ne Bueiros", "EXPORTAR > CSV CANAIS E BUEIROS", "CE", "Exporta CSV com dados de canais e bueiros (em definição).");
-
-                RibbonPanelSource painelModificar = ObterOuCriarPainelFonte(abaDrenagem, m_panelModificarId, "MODIFICAR");
-                AdicionarBotaoComando(
-                    painelModificar,
+                RibbonSplitButton dropdownAnotarAlinh = CriarDropdown(
+                    painelAlinhamentos,
+                    "ZAGO_DROPDOWN_ALINH_ANOTAR",
+                    "Anotação",
+                    "LS",
+                    "Comandos de anotação de alinhamentos.");
+                AdicionarItemDropdown(
+                    dropdownAnotarAlinh,
                     "ZAGO_MUDAR_LABEL_SET_ALINH",
-                    "Mudar Label Set\nAlinhamentos",
+                    "Mudar Label Set",
                     "ZAGO_MUDAR_LABEL_SET_ALINHAMENTOS ",
                     "LS",
                     "Aplica um Alignment Label Set Style a todos os alinhamentos do desenho, opcionalmente apagando os labels existentes antes. Janela modeless.");
 
-                RibbonPanelSource painelAnotar = ObterOuCriarPainelFonte(abaDrenagem, m_panelAnotarId, "ANOTAR");
-                AdicionarBotaoGrande(painelAnotar, "ZAGO_ANOTAR_LABELS_CORR", "Labels\nCorredores", "ANOTAR > ADICIONAR LABELS DOS TRECHOS/REGIOES DOS CORREDORES EM PLANTA", "LB", "Adiciona labels dos trechos/regiões dos corredores em planta (em definição).");
+                // PERFIS (Criar)
+                RibbonPanelSource painelPerfis = ObterOuCriarPainelFonte(aba, m_panelPerfisId, "PERFIS");
+                RibbonSplitButton dropdownCriarPerfis = CriarDropdown(
+                    painelPerfis,
+                    "ZAGO_DROPDOWN_PERFIS_CRIAR",
+                    "Criar",
+                    "PP",
+                    "Comandos de criação de perfis.");
+                AdicionarItemDropdown(
+                    dropdownCriarPerfis,
+                    "ZAGO_CRIAR_PERFIL_PROJ",
+                    "Perfis de Projeto",
+                    "ZAGO_CRIAR_PERFIS_DE_PROJETO ",
+                    "PP",
+                    "Cria perfis de projeto (layout profiles) para todos os alinhamentos a partir de uma superficie.");
+                AdicionarItemDropdown(
+                    dropdownCriarPerfis,
+                    "ZAGO_CRIAR_PERFIL_TN",
+                    "Perfis de superfície",
+                    "ZAGO_CRIAR_PERFIS_TERRENO ",
+                    "TN",
+                    "Cria surface profiles (perfis do terreno natural e de terraplenagem) para todos os alinhamentos, a partir de uma superficie TIN. Janela modeless.");
 
-                RibbonPanelSource painelDeletar = ObterOuCriarPainelFonte(abaDrenagem, m_panelDeletarId, "DELETAR");
-                AdicionarBotaoGrande(painelDeletar, "ZAGO_DELETAR_DUMMY", "Deletar\n(Dummy)", "DELETAR > FUNCOES EM DEFINICAO", "DL", "Funções de exclusão (em definição).");
+                // PROFILE VIEWS (Criar)
+                RibbonPanelSource painelProfileViews = ObterOuCriarPainelFonte(aba, m_panelProfileViewsId, "PROFILE VIEWS");
+                RibbonSplitButton dropdownCriarProfileViews = CriarDropdown(
+                    painelProfileViews,
+                    "ZAGO_DROPDOWN_PROFILEVIEWS_CRIAR",
+                    "Criar",
+                    "PV",
+                    "Comandos de criação de profile views.");
+                AdicionarItemDropdown(
+                    dropdownCriarProfileViews,
+                    "ZAGO_CRIAR_PROFILE_VIEW",
+                    "Profile View",
+                    "ZAGO_CRIAR_PROFILE_VIEWS ",
+                    "PV",
+                    "Cria profile views para todos os alinhamentos, empilhados verticalmente a partir de uma coordenada inicial. Janela modeless.");
 
-                RibbonTab abaTerraplenagem = ObterOuCriarAba(ribbon, m_tabTerraplenagemId, "ZAGO - TERRAPLENAGEM");
-                RibbonPanelSource painelFeatureLinesTerraplenagem = ObterOuCriarPainelFonte(
-                    abaTerraplenagem,
-                    m_panelFeatureLinesId,
-                    "FEATURE LINES");
-                AdicionarBotaoComando(
-                    painelFeatureLinesTerraplenagem,
+                // COGOPOINTS (Criar)
+                RibbonPanelSource painelCogopoints = ObterOuCriarPainelFonte(aba, m_panelCogopointsId, "COGOPOINTS");
+                RibbonSplitButton dropdownCriarCogopoints = CriarDropdown(
+                    painelCogopoints,
+                    "ZAGO_DROPDOWN_COGOPOINTS_CRIAR",
+                    "Criar",
+                    "PX",
+                    "Comandos de criação de cogopoints.");
+                AdicionarItemDropdown(
+                    dropdownCriarCogopoints,
+                    "ZAGO_CRIAR_PONTOS_CRUZ",
+                    "Pontos nos Cruzamentos",
+                    "ZAGO_CRIAR_PONTOS_CRUZAMENTOS_ALINHAMENTOS ",
+                    "PX",
+                    "Cria CogoPoints nos cruzamentos entre alinhamentos, organizados em blocos (trackers) com rotulos sequenciais. Janela modeless.");
+
+                // CORREDORES (Criar + Anotação)
+                RibbonPanelSource painelCorredores = ObterOuCriarPainelFonte(aba, m_panelCorredoresId, "CORREDORES");
+                RibbonSplitButton dropdownCriarCorredores = CriarDropdown(
+                    painelCorredores,
+                    "ZAGO_DROPDOWN_CORREDORES_CRIAR",
+                    "Criar",
+                    "CO",
+                    "Comandos de criação de corredores e regiões.");
+                AdicionarItemDropdown(
+                    dropdownCriarCorredores,
+                    "ZAGO_CRIAR_CORRED_POR_ALINH",
+                    "Por Alinhamentos",
+                    "ZAGO_CRIAR_CORREDORES_POR_ALINHAMENTOS ",
+                    "CA",
+                    "Cria um corredor vazio para cada alinhamento do desenho, com nome derivado do alinhamento (prefixo e sufixo opcionais). Janela modeless.");
+                AdicionarItemDropdown(
+                    dropdownCriarCorredores,
+                    "ZAGO_CRIAR_REGIOES_CORREDORES",
+                    "Regiões a partir de Corredores",
+                    "ZAGO_CRIAR_REGIOES_CORREDORES ",
+                    "RG",
+                    "Quebra cada baseline de cada corredor em regioes, usando cruzamentos com outros alinhamentos, mudancas bruscas de direcao horizontal e mudancas de declividade no perfil como criterios. Apaga regioes existentes antes de recriar. Janela modeless.");
+
+                RibbonSplitButton dropdownAnotarCorredores = CriarDropdown(
+                    painelCorredores,
+                    "ZAGO_DROPDOWN_CORREDORES_ANOTAR",
+                    "Anotação",
+                    "LB",
+                    "Comandos de anotação de corredores.");
+                AdicionarItemDropdownDummy(
+                    dropdownAnotarCorredores,
+                    "ZAGO_ANOTAR_LABELS_CORR",
+                    "Labels Corredores",
+                    "CORREDORES > ADICIONAR LABELS DOS TRECHOS/REGIOES DOS CORREDORES EM PLANTA",
+                    "LB",
+                    "Adiciona labels dos trechos/regiões dos corredores em planta (em definição).");
+
+                // FEATURE LINES (Criar + Modificar)
+                RibbonPanelSource painelFeatureLines = ObterOuCriarPainelFonte(aba, m_panelFeatureLinesId, "FEATURE LINES");
+                RibbonSplitButton dropdownCriarFeatureLines = CriarDropdown(
+                    painelFeatureLines,
+                    "ZAGO_DROPDOWN_FEATURELINES_CRIAR",
+                    "Criar",
+                    "TP",
+                    "Comandos de criação de feature lines.");
+                AdicionarItemDropdown(
+                    dropdownCriarFeatureLines,
                     "ZAGO_TERRAPL_FEATURE_LINES_SEPARADAS",
-                    "Feature Lines\nSeparadas",
+                    "Feature Lines Separadas",
                     "ZAGO_TERRAPLENAGEM_FEATURE_LINES_SEPARADAS ",
                     "TP",
                     "Cria feature lines separadas a partir de polilinhas de terraplenagem.");
-                AdicionarBotaoComando(
-                    painelFeatureLinesTerraplenagem,
+
+                RibbonSplitButton dropdownModificarFeatureLines = CriarDropdown(
+                    painelFeatureLines,
+                    "ZAGO_DROPDOWN_FEATURELINES_MODIFICAR",
+                    "Modificar",
+                    "DF",
+                    "Comandos de modificação de feature lines.");
+                AdicionarItemDropdown(
+                    dropdownModificarFeatureLines,
                     "ZAGO_TERRAPL_AJUSTAR_DEFLEXAO",
-                    "Ajustar\nDeflexao",
+                    "Ajustar Deflexão",
                     "ZAGO_AJUSTAR_DEFLEXAO_FEATURE_LINES ",
                     "DF",
                     "Ajusta iterativamente as cotas dos PI points das feature lines ate que a deflexao entre segmentos adjacentes fique dentro do limite. Duas passadas (montante->jusante e jusante->montante). Janela modeless.");
+
+                // BACIAS (Criar + Exportar)
+                RibbonPanelSource painelBacias = ObterOuCriarPainelFonte(aba, m_panelBaciasId, "BACIAS");
+                RibbonSplitButton dropdownCriarBacias = CriarDropdown(
+                    painelBacias,
+                    "ZAGO_DROPDOWN_BACIAS_CRIAR",
+                    "Criar",
+                    "BC",
+                    "Comandos de criação de bacias e talvegues.");
+                AdicionarItemDropdown(
+                    dropdownCriarBacias,
+                    "ZAGO_CRIAR_CATCHMENTS_HATCHS",
+                    "Catchments de Hatches",
+                    "ZAGO_CRIAR_CATCHMENTS_DE_HATCHS ",
+                    "BC",
+                    "Cria catchments (subbacias) a partir das hatches de uma layer, associando o MText de ID e a polilinha de talvegue contidos em cada hatch. O talvegue vira flow path do catchment. Janela modeless.");
+                AdicionarItemDropdown(
+                    dropdownCriarBacias,
+                    "ZAGO_CRIAR_TALVEGUES_CATCH",
+                    "Talvegues dos Catchments",
+                    "ZAGO_CRIAR_TALVEGUES_CATCHMENTS ",
+                    "TC",
+                    "Define o FlowPath dos catchments existentes a partir das polilinhas desenhadas em uma layer (padrao ZAGO: HDR-TALVEGUES SUBBACIAS). Cada polyline vira o talvegue do catchment que a contem. Janela modeless.");
+
+                RibbonSplitButton dropdownExportarBacias = CriarDropdown(
+                    painelBacias,
+                    "ZAGO_DROPDOWN_BACIAS_EXPORTAR",
+                    "Exportar",
+                    "SB",
+                    "Comandos de exportação de dados de bacias.");
+                AdicionarItemDropdownDummy(
+                    dropdownExportarBacias,
+                    "ZAGO_EXPORTAR_CSV_BACIAS",
+                    "CSV Bacias e Subbacias",
+                    "BACIAS > CSV BACIAS/SUBBACIAS (ID, AREA, TALVEGUE, DECLIVIDADE, ID_JUSANTE)",
+                    "SB",
+                    "Exporta CSV com dados de bacias e subbacias (em definição).");
+
+                // CAIXAS (Criar + Exportar)
+                RibbonPanelSource painelCaixas = ObterOuCriarPainelFonte(aba, m_panelCaixasId, "CAIXAS");
+                RibbonSplitButton dropdownCriarCaixas = CriarDropdown(
+                    painelCaixas,
+                    "ZAGO_DROPDOWN_CAIXAS_CRIAR",
+                    "Criar",
+                    "CX",
+                    "Comandos de criação de caixas de drenagem.");
+                AdicionarItemDropdownDummy(
+                    dropdownCriarCaixas,
+                    "ZAGO_CRIAR_CAIXAS",
+                    "Criar Caixas",
+                    "CAIXAS > FUNCOES DE CRIACAO DE CAIXAS",
+                    "CX",
+                    "Funções de criação de caixas de drenagem (em definição).");
+
+                RibbonSplitButton dropdownExportarCaixas = CriarDropdown(
+                    painelCaixas,
+                    "ZAGO_DROPDOWN_CAIXAS_EXPORTAR",
+                    "Exportar",
+                    "CE",
+                    "Comandos de exportação de dados de canais e bueiros.");
+                AdicionarItemDropdownDummy(
+                    dropdownExportarCaixas,
+                    "ZAGO_EXPORTAR_CSV_CANAIS",
+                    "CSV Canais e Bueiros",
+                    "CAIXAS > CSV CANAIS E BUEIROS",
+                    "CE",
+                    "Exporta CSV com dados de canais e bueiros (em definição).");
+
+                // DELETAR
+                RibbonPanelSource painelDeletar = ObterOuCriarPainelFonte(aba, m_panelDeletarId, "DELETAR");
+                RibbonSplitButton dropdownDeletar = CriarDropdown(
+                    painelDeletar,
+                    "ZAGO_DROPDOWN_DELETAR",
+                    "Deletar",
+                    "DL",
+                    "Comandos de exclusão de elementos.");
+                AdicionarItemDropdownDummy(
+                    dropdownDeletar,
+                    "ZAGO_DELETAR_DUMMY",
+                    "Deletar (Dummy)",
+                    "DELETAR > FUNCOES EM DEFINICAO",
+                    "DL",
+                    "Funções de exclusão (em definição).");
 
                 documento?.Editor.WriteMessage("\n[ZagoCivil3D] Aba e botão criados com sucesso.");
                 documento?.Editor.WriteMessage($"\n[ZagoCivil3D] Aba ativa: {ribbon.ActiveTab?.Id ?? "(nenhuma)"}");
@@ -268,51 +393,100 @@ namespace ZagoCivil3D.Ribbon
             return fontePainel;
         }
 
-        private static void AdicionarBotaoGrande(
+        /// <summary>
+        /// Cria um dropdown (RibbonSplitButton) dentro de um painel do ribbon.
+        /// Configurado como menu puro (IsSplit = false) — o botão inteiro abre
+        /// a lista de itens sem executar nenhum comando padrão.
+        /// </summary>
+        private static RibbonSplitButton CriarDropdown(
             RibbonPanelSource fontePainel,
-            string idBotao,
-            string textoBotao,
-            string mensagemDummy,
+            string idDropdown,
+            string textoDropdown,
             string siglaIcone,
             string descricao = "")
         {
-            AdicionarBotao(fontePainel, idBotao, textoBotao, m_prefixoComandoDummy + mensagemDummy, siglaIcone, descricao);
-        }
+            RibbonSplitButton? dropdownExistente = fontePainel.Items
+                .OfType<RibbonSplitButton>()
+                .FirstOrDefault(b => string.Equals(b.Id, idDropdown, StringComparison.OrdinalIgnoreCase));
 
-        private static void AdicionarBotaoComando(
-            RibbonPanelSource fontePainel,
-            string idBotao,
-            string textoBotao,
-            string nomeComando,
-            string siglaIcone,
-            string descricao = "")
-        {
-            AdicionarBotao(fontePainel, idBotao, textoBotao, nomeComando, siglaIcone, descricao);
-        }
+            if (dropdownExistente != null)
+                return dropdownExistente;
 
-        private static void AdicionarBotao(
-            RibbonPanelSource fontePainel,
-            string idBotao,
-            string textoBotao,
-            string parametroComando,
-            string siglaIcone,
-            string descricao = "")
-        {
-            bool botaoExiste = fontePainel.Items
-                .OfType<RibbonButton>()
-                .Any(b => string.Equals(b.Id, idBotao, StringComparison.OrdinalIgnoreCase));
-
-            if (botaoExiste)
-                return;
-
-            var botao = new RibbonButton
+            var dropdown = new RibbonSplitButton
             {
-                Id = idBotao,
-                Text = textoBotao,
+                Id = idDropdown,
+                Text = textoDropdown,
                 ShowText = true,
                 ShowImage = true,
                 Size = RibbonItemSize.Large,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
+                LargeImage = CriarIcone(siglaIcone, grande: true),
+                Image = CriarIcone(siglaIcone, grande: false),
+                ListStyle = RibbonSplitButtonListStyle.List,
+                IsSplit = false,
+                IsSynchronizedWithCurrentItem = false
+            };
+
+            if (!string.IsNullOrWhiteSpace(descricao))
+            {
+                dropdown.Description = descricao;
+                dropdown.ToolTip = new RibbonToolTip
+                {
+                    Title = textoDropdown.Replace("\n", " "),
+                    Content = descricao,
+                    Command = idDropdown
+                };
+            }
+
+            fontePainel.Items.Add(dropdown);
+            return dropdown;
+        }
+
+        private static void AdicionarItemDropdown(
+            RibbonSplitButton dropdown,
+            string idItem,
+            string textoItem,
+            string nomeComando,
+            string siglaIcone,
+            string descricao = "")
+        {
+            AdicionarItem(dropdown, idItem, textoItem, nomeComando, siglaIcone, descricao);
+        }
+
+        private static void AdicionarItemDropdownDummy(
+            RibbonSplitButton dropdown,
+            string idItem,
+            string textoItem,
+            string mensagemDummy,
+            string siglaIcone,
+            string descricao = "")
+        {
+            AdicionarItem(dropdown, idItem, textoItem, m_prefixoComandoDummy + mensagemDummy, siglaIcone, descricao);
+        }
+
+        private static void AdicionarItem(
+            RibbonSplitButton dropdown,
+            string idItem,
+            string textoItem,
+            string parametroComando,
+            string siglaIcone,
+            string descricao = "")
+        {
+            bool itemExiste = dropdown.Items
+                .OfType<RibbonButton>()
+                .Any(b => string.Equals(b.Id, idItem, StringComparison.OrdinalIgnoreCase));
+
+            if (itemExiste)
+                return;
+
+            var item = new RibbonButton
+            {
+                Id = idItem,
+                Text = textoItem,
+                ShowText = true,
+                ShowImage = true,
+                Size = RibbonItemSize.Large,
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
                 LargeImage = CriarIcone(siglaIcone, grande: true),
                 Image = CriarIcone(siglaIcone, grande: false),
                 CommandParameter = parametroComando,
@@ -321,16 +495,16 @@ namespace ZagoCivil3D.Ribbon
 
             if (!string.IsNullOrWhiteSpace(descricao))
             {
-                botao.Description = descricao;
-                botao.ToolTip = new RibbonToolTip
+                item.Description = descricao;
+                item.ToolTip = new RibbonToolTip
                 {
-                    Title = textoBotao.Replace("\n", " "),
+                    Title = textoItem.Replace("\n", " "),
                     Content = descricao,
-                    Command = idBotao
+                    Command = idItem
                 };
             }
 
-            fontePainel.Items.Add(botao);
+            dropdown.Items.Add(item);
         }
 
         /// <summary>
