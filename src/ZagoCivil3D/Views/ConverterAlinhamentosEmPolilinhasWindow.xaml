@@ -1,0 +1,258 @@
+<Window x:Class="ZagoCivil3D.Views.ConverterAlinhamentosEmPolilinhasWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Converter Alinhamentos em Polilinhas 2D"
+        Width="960"
+        Height="760"
+        MinWidth="960"
+        MinHeight="760"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#FFF5F5F5">
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,0,0,1"
+                Padding="22,18,22,16">
+            <StackPanel>
+                <TextBlock Text="CONVERTER ALINHAMENTOS EM POLILINHAS 2D"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="#FF2D2D2D" />
+                <TextBlock Text="Percorre todos os alinhamentos do desenho e cria uma polilinha 2D (entidade Polyline) para cada um. Linhas retas viram segmentos; arcos circulares sao preservados com bulge; espirais (clotoides) sao discretizadas em segmentos retos pelo passo configurado."
+                           Margin="0,8,0,0"
+                           FontSize="13"
+                           Foreground="#FF6A6A6A"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="22,18,22,18">
+                <Border Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Filtro de alinhamentos"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Texto contido no nome (opcional)" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="FiltroNomeTextBox" Grid.Row="0" Grid.Column="2" Height="36" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Filtro por nome do alinhamento" FontWeight="Bold" /><LineBreak />
+                                    Apenas alinhamentos cujo nome contem este texto (case-insensitive) sao convertidos. Ex.: "Acesso" seleciona "Acesso 01", "Acesso Principal", etc. Deixe vazio para converter todos os alinhamentos.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Destino da polilinha"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,9,0,0" Text="Layer das polilinhas" FontSize="14" Foreground="#FF444444" />
+                        <ComboBox x:Name="LayerComboBox" Grid.Row="0" Grid.Column="2" Height="36" Margin="0,0,0,14" Padding="8,4" FontSize="14"
+                                  IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True">
+                            <ComboBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Layer das polilinhas criadas" FontWeight="Bold" /><LineBreak />
+                                    Layer aplicada as polilinhas geradas. Se a layer nao existir no desenho, ela e criada automaticamente. Digite para filtrar a lista. Se vazio, a layer corrente e usada.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Elevation (Z) das polilinhas" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="ElevationTextBox" Grid.Row="1" Grid.Column="2" Height="36" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="360">
+                                    <Run Text="Elevation das polilinhas" FontWeight="Bold" /><LineBreak />
+                                    A entidade Polyline do AutoCAD e plana. Este valor define o plano Z que contem a polilinha. Use 0 para polilinhas no plano XY do desenho.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Estrategia de conversao"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <CheckBox x:Name="PreservarArcosCheckBox" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,4,0,14"
+                                  IsChecked="True" FontSize="14" Foreground="#FF444444"
+                                  Content="Preservar arcos circulares (usar bulge no vertice)">
+                            <CheckBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Preservar arcos" FontWeight="Bold" /><LineBreak />
+                                    Quando marcado, arcos circulares do alinhamento viram segmentos com bulge real na polilinha, mantendo a geometria curva. Quando desmarcado, os arcos sao discretizados em segmentos retos pelo mesmo passo das espirais. Padrao marcado.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,9,0,0" Text="Passo discretizacao (m) - espirais" FontSize="14" Foreground="#FF444444" />
+                        <TextBox x:Name="PassoDiscretizacaoTextBox" Grid.Row="1" Grid.Column="2" Height="36" Padding="8,4" FontSize="14">
+                            <TextBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Passo de discretizacao" FontWeight="Bold" /><LineBreak />
+                                    Comprimento em metros entre vertices durante a discretizacao de espirais (e arcos, quando "Preservar arcos" estiver desmarcado). Valores menores geram polilinhas mais fieis, ao custo de mais vertices. Padrao 1.0 m.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="#FFF0F0F0"
+                        BorderBrush="#FFD8D8D8"
+                        BorderThickness="1"
+                        Padding="12,9">
+                    <TextBlock Text="Acoes destrutivas"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#FF555555" />
+                </Border>
+
+                <Border Margin="0,14,0,0"
+                        Background="White"
+                        BorderBrush="#FFE1E1E1"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="18">
+                    <StackPanel>
+                        <CheckBox x:Name="ApagarAlinhamentosCheckBox" Margin="0,4,0,0"
+                                  IsChecked="False" FontSize="14" Foreground="#FF444444"
+                                  Content="Apagar alinhamentos originais apos a conversao">
+                            <CheckBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Apagar alinhamentos originais" FontWeight="Bold" /><LineBreak />
+                                    Acao destrutiva! Quando marcado, os alinhamentos do Civil 3D sao apagados apos a criacao das polilinhas. Perfis e corredores associados podem ser invalidados. Use com cautela.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <CheckBox x:Name="DryRunCheckBox" Margin="0,10,0,0"
+                                  IsChecked="False" FontSize="14" Foreground="#FF444444"
+                                  Content="Modo dry-run (nao cria polilinhas, apenas reporta)">
+                            <CheckBox.ToolTip>
+                                <TextBlock TextWrapping="Wrap" MaxWidth="380">
+                                    <Run Text="Modo dry-run" FontWeight="Bold" /><LineBreak />
+                                    Quando marcado, apenas calcula e reporta a conversao sem criar nada no desenho. Util para validar parametros antes de executar de fato.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border x:Name="StatusBorder"
+                Grid.Row="2"
+                Visibility="Collapsed"
+                BorderThickness="1"
+                CornerRadius="0"
+                Padding="22,10">
+            <TextBlock x:Name="StatusTextBlock"
+                       FontSize="13"
+                       TextWrapping="Wrap" />
+        </Border>
+
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#FFD9D9D9"
+                BorderThickness="0,1,0,0"
+                Padding="22,14">
+            <DockPanel LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           Text="Cria uma polilinha 2D para cada alinhamento do desenho."
+                           FontSize="13"
+                           Foreground="#FF666666" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="CancelarButton" Width="110" Height="36" Margin="0,0,10,0" Click="AoClicarCancelar" Content="Fechar" />
+                    <Button x:Name="ConfirmarButton" Width="130" Height="36" Click="AoClicarConfirmar" Content="Executar" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

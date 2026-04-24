@@ -138,6 +138,20 @@ namespace ZagoCivil3D.Ribbon
                     "LS",
                     "Aplica um Alignment Label Set Style a todos os alinhamentos do desenho, opcionalmente apagando os labels existentes antes. Janela modeless.");
 
+                RibbonSplitButton dropdownConverterAlinh = CriarDropdown(
+                    painelAlinhamentos,
+                    "ZAGO_DROPDOWN_ALINH_CONVERTER",
+                    "Converter",
+                    "AP",
+                    "Comandos de conversao de alinhamentos em outras entidades.");
+                AdicionarItemDropdown(
+                    dropdownConverterAlinh,
+                    "ZAGO_CONVERTER_ALINH_EM_POLI",
+                    "Em Polilinhas 2D",
+                    "ZAGO_CONVERTER_ALINHAMENTOS_EM_POLILINHAS ",
+                    "AP",
+                    "Converte todos os alinhamentos do desenho em polilinhas 2D (Polyline). Arcos circulares viram vertices com bulge; espirais sao discretizadas em segmentos retos pelo passo configurado. Janela modeless.");
+
                 // PERFIS (Criar)
                 RibbonPanelSource painelPerfis = ObterOuCriarPainelFonte(aba, m_panelPerfisId, "PERFIS");
                 RibbonSplitButton dropdownCriarPerfis = CriarDropdown(
@@ -996,6 +1010,60 @@ namespace ZagoCivil3D.Ribbon
                     }
                     break;
 
+                case "AP":
+                    // Converter alinhamento em polilinha: seta apontando de um
+                    // alinhamento (curva suave) para uma polilinha (segmentos
+                    // retos + vertices destacados), indicando a transformacao.
+                    {
+                        // Alinhamento de origem (curva suave) na parte superior
+                        var origem = new StreamGeometry();
+                        using (var ctx = origem.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.08, s * 0.32), false, false);
+                            ctx.BezierTo(
+                                new Point(s * 0.28, s * 0.10),
+                                new Point(s * 0.60, s * 0.40),
+                                new Point(s * 0.92, s * 0.20),
+                                true, false);
+                        }
+                        origem.Freeze();
+                        g.DrawGeometry(null, penEscuro, origem);
+
+                        // Seta para baixo (transformacao)
+                        var seta = new StreamGeometry();
+                        using (var ctx = seta.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.50, s * 0.62), true, true);
+                            ctx.LineTo(new Point(s * 0.40, s * 0.50), true, false);
+                            ctx.LineTo(new Point(s * 0.46, s * 0.50), true, false);
+                            ctx.LineTo(new Point(s * 0.46, s * 0.42), true, false);
+                            ctx.LineTo(new Point(s * 0.54, s * 0.42), true, false);
+                            ctx.LineTo(new Point(s * 0.54, s * 0.50), true, false);
+                            ctx.LineTo(new Point(s * 0.60, s * 0.50), true, false);
+                        }
+                        seta.Freeze();
+                        g.DrawGeometry(corCinza, null, seta);
+
+                        // Polilinha 2D resultante (segmentos retos com vertices)
+                        var destino = new StreamGeometry();
+                        using (var ctx = destino.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.10, s * 0.88), false, false);
+                            ctx.LineTo(new Point(s * 0.32, s * 0.72), true, false);
+                            ctx.LineTo(new Point(s * 0.58, s * 0.82), true, false);
+                            ctx.LineTo(new Point(s * 0.90, s * 0.68), true, false);
+                        }
+                        destino.Freeze();
+                        g.DrawGeometry(null, penPrincipal, destino);
+
+                        double r = s * 0.075;
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.10, s * 0.88), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.32, s * 0.72), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.58, s * 0.82), r, r);
+                        g.DrawEllipse(corPrincipal, null, new Point(s * 0.90, s * 0.68), r, r);
+                    }
+                    break;
+
                 default:
                     // Fallback: disco simples
                     g.DrawEllipse(corPrincipal, null, new Point(s * 0.5, s * 0.5), s * 0.3, s * 0.3);
@@ -1009,6 +1077,7 @@ namespace ZagoCivil3D.Ribbon
             {
                 "AL" => Color.FromRgb(0, 120, 212),
                 "AO" => Color.FromRgb(0, 90, 180),
+                "AP" => Color.FromRgb(32, 150, 200),
                 "PX" => Color.FromRgb(90, 90, 220),
                 "PP" => Color.FromRgb(0, 153, 102),
                 "TN" => Color.FromRgb(46, 139, 87),
