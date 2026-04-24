@@ -27,6 +27,7 @@ namespace ZagoCivil3D.Ribbon
         private const string m_panelFeatureLinesId = "ZAGO_FEATURE_LINES_PANEL";
         private const string m_panelBaciasId = "ZAGO_BACIAS_PANEL";
         private const string m_panelCaixasId = "ZAGO_CAIXAS_PANEL";
+        private const string m_panelTopologiaId = "ZAGO_TOPOLOGIA_PANEL";
         private const string m_panelDeletarId = "ZAGO_DELETAR_PANEL";
         private const string m_prefixoComandoDummy = "DUMMY_PRINT:";
         private static bool m_aguardandoRibbon;
@@ -327,19 +328,21 @@ namespace ZagoCivil3D.Ribbon
                     "CX",
                     "Funções de criação de caixas de drenagem (em definição).");
 
-                RibbonSplitButton dropdownExportarCaixas = CriarDropdown(
-                    painelCaixas,
-                    "ZAGO_DROPDOWN_CAIXAS_EXPORTAR",
+                // TOPOLOGIA (Exportar)
+                RibbonPanelSource painelTopologia = ObterOuCriarPainelFonte(aba, m_panelTopologiaId, "TOPOLOGIA");
+                RibbonSplitButton dropdownExportarTopologia = CriarDropdown(
+                    painelTopologia,
+                    "ZAGO_DROPDOWN_TOPOLOGIA_EXPORTAR",
                     "Exportar",
                     "CE",
-                    "Comandos de exportação de dados de canais e bueiros.");
+                    "Comandos de exportação da topologia da rede a partir dos elementos do Civil 3D.");
                 AdicionarItemDropdownDummy(
-                    dropdownExportarCaixas,
+                    dropdownExportarTopologia,
                     "ZAGO_EXPORTAR_CSV_CANAIS",
                     "CSV Canais e Bueiros",
-                    "CAIXAS > CSV CANAIS E BUEIROS",
+                    "TOPOLOGIA > CSV CANAIS E BUEIROS",
                     "CE",
-                    "Exporta CSV com dados de canais e bueiros (em definição).");
+                    "Exporta CSV com a topologia de canais e bueiros (em definição).");
 
                 // DELETAR
                 RibbonPanelSource painelDeletar = ObterOuCriarPainelFonte(aba, m_panelDeletarId, "DELETAR");
