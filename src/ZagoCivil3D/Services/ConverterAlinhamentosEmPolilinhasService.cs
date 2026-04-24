@@ -56,7 +56,11 @@ public static class ConverterAlinhamentosEmPolilinhasService
                 $"\n[ZagoCivil3D] Convertendo {idsAlinhamentos.Count} alinhamento(s) em polilinhas 2D...");
         }
 
-        GarantirLayerExiste(db, request.NomeLayer, resultado);
+        // Em dry-run nao alteramos o desenho: a layer so e criada na execucao
+        // real, evitando que a mera visualizacao do preview persista uma layer
+        // nova no DWG.
+        if (!request.DryRun)
+            GarantirLayerExiste(db, request.NomeLayer, resultado);
 
         double passo = request.PassoDiscretizacaoEspirais <= 0
             ? 1.0
@@ -111,11 +115,15 @@ public static class ConverterAlinhamentosEmPolilinhasService
 
                     polilinha.Elevation = request.Elevation;
 
+                    // Captura antes do Dispose para que o dry-run reporte a mesma
+                    // contagem de vertices que a execucao real criaria — segmentos
+                    // conectados compartilham extremidades, entao N sub-entidades
+                    // nao implicam N vertices.
+                    detalhe.TotalVertices = polilinha.NumberOfVertices;
+
                     if (request.DryRun)
                     {
                         polilinha.Dispose();
-                        detalhe.TotalVertices = detalhe.TotalLinhas + detalhe.TotalArcos
-                            + detalhe.VerticesDiscretizadosEspirais;
                         resultado.Convertidos.Add(detalhe);
                         continue;
                     }
@@ -123,7 +131,6 @@ public static class ConverterAlinhamentosEmPolilinhasService
                     modelSpace.AppendEntity(polilinha);
                     transacao.AddNewlyCreatedDBObject(polilinha, true);
 
-                    detalhe.TotalVertices = polilinha.NumberOfVertices;
                     resultado.Convertidos.Add(detalhe);
                     resultado.TotalPolilinhasCriadas++;
 
