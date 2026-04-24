@@ -318,13 +318,13 @@ namespace ZagoCivil3D.Ribbon
                     "Exportar",
                     "SB",
                     "Comandos de exportação de dados de bacias.");
-                AdicionarItemDropdownDummy(
+                AdicionarItemDropdown(
                     dropdownExportarBacias,
                     "ZAGO_EXPORTAR_CSV_BACIAS",
                     "CSV Bacias e Subbacias",
-                    "BACIAS > CSV BACIAS/SUBBACIAS (ID, AREA, TALVEGUE, DECLIVIDADE, ID_JUSANTE)",
+                    "ZAGO_EXPORTAR_CSV_BACIAS_SUBBACIAS ",
                     "SB",
-                    "Exporta CSV com dados de bacias e subbacias (em definição).");
+                    "Exporta CSV com BACIA, SUBBACIA, AREA, L_TALVEGUE, S_TALVEGUE e ID_JUSANTE a partir das hatches, MTexts e polilinhas do desenho, mais regioes de corredores para o ID_JUSANTE. Janela modeless.");
 
                 // CAIXAS (Criar + Exportar)
                 RibbonPanelSource painelCaixas = ObterOuCriarPainelFonte(aba, m_panelCaixasId, "CAIXAS");
