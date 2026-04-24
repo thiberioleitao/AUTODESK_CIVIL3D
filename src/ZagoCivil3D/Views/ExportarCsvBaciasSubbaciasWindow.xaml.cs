@@ -43,7 +43,10 @@ public partial class ExportarCsvBaciasSubbaciasWindow : Window
 
         ConfigurarComboBoxFiltravel(LayerMTextsComboBox, layers, layerMtextsInicial ?? m_layerMtextsPadrao);
         ConfigurarComboBoxFiltravel(LayerTalveguesComboBox, layers, layerTalveguesInicial ?? m_layerTalveguesPadrao);
-        ConfigurarComboBoxFiltravel(SuperficieComboBox, superficies, superficies.FirstOrDefault());
+        // Superficie fica em branco por padrao: escolhas tipo "terreno natural" vs
+        // "projeto" mudam completamente o S_TALVEGUE, entao preferimos que o
+        // usuario opte explicitamente em vez de pegar a primeira da lista.
+        ConfigurarComboBoxFiltravel(SuperficieComboBox, superficies, inicial: null);
 
         PrefixoLayersHatchesTextBox.Text = m_prefixoLayersHatchesPadrao;
         PrefixoRemoverBaciaTextBox.Text = m_prefixoRemoverBaciaPadrao;

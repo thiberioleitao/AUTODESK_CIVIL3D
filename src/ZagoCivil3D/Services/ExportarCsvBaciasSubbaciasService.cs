@@ -78,12 +78,17 @@ public static class ExportarCsvBaciasSubbaciasService
         }
 
         // Resolve superficie (opcional — sem ela, S_TALVEGUE fica em branco).
+        // Se o usuario pediu uma superficie mas ela nao existe, tratamos como
+        // erro bloqueante: seguir em silencio produziria CSV aparentemente OK
+        // com declividades faltando por typo no nome, o que mascara o problema.
         Autodesk.Civil.DatabaseServices.Surface? superficie = null;
         ObjectId idSuperficie = ResolverIdSuperficie(civilDoc, db, request.NomeSuperficie);
         if (idSuperficie.IsNull && !string.IsNullOrWhiteSpace(request.NomeSuperficie))
         {
-            resultado.Logs.Add(
-                $"Superficie '{request.NomeSuperficie}' nao encontrada. S_TALVEGUE ficara em branco.");
+            resultado.MensagensErro.Add(
+                $"Superficie '{request.NomeSuperficie}' nao encontrada no desenho. " +
+                "Confirme o nome exato (case-insensitive) ou deixe o campo em branco para exportar sem S_TALVEGUE.");
+            return resultado;
         }
 
         List<HatchDeSubbacia> hatches;
