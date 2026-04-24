@@ -176,7 +176,7 @@ namespace ZagoCivil3D.Ribbon
                     "TN",
                     "Cria surface profiles (perfis do terreno natural e de terraplenagem) para todos os alinhamentos, a partir de uma superficie TIN. Janela modeless.");
 
-                // PROFILE VIEWS (Criar)
+                // PROFILE VIEWS (Criar + Anotação)
                 RibbonPanelSource painelProfileViews = ObterOuCriarPainelFonte(aba, m_panelProfileViewsId, "PROFILE VIEWS");
                 RibbonSplitButton dropdownCriarProfileViews = CriarDropdown(
                     painelProfileViews,
@@ -191,6 +191,20 @@ namespace ZagoCivil3D.Ribbon
                     "ZAGO_CRIAR_PROFILE_VIEWS ",
                     "PV",
                     "Cria profile views para todos os alinhamentos, empilhados verticalmente a partir de uma coordenada inicial. Janela modeless.");
+
+                RibbonSplitButton dropdownAnotarProfileViews = CriarDropdown(
+                    painelProfileViews,
+                    "ZAGO_DROPDOWN_PROFILEVIEWS_ANOTAR",
+                    "Anotação",
+                    "LV",
+                    "Comandos de anotação de profile views.");
+                AdicionarItemDropdown(
+                    dropdownAnotarProfileViews,
+                    "ZAGO_ADICIONAR_LABELS_PV",
+                    "Adicionar Labels",
+                    "ZAGO_ADICIONAR_LABELS_PROFILE_VIEWS ",
+                    "LV",
+                    "Para cada alinhamento, aplica um Profile Line Label Style nos profiles (filtrados por nome) dentro de cada profile view. Janela modeless.");
 
                 // COGOPOINTS (Criar)
                 RibbonPanelSource painelCogopoints = ObterOuCriarPainelFonte(aba, m_panelCogopointsId, "COGOPOINTS");
@@ -865,6 +879,38 @@ namespace ZagoCivil3D.Ribbon
                     g.DrawLine(penEscuro, new Point(s * 0.62, s * 0.42), new Point(s * 0.62, s * 0.76));
                     break;
 
+                case "LV":
+                    // Label em Profile View: eixos L da profile view com uma
+                    // curva de profile marcada por tick marks e uma etiqueta.
+                    {
+                        // Eixos da profile view (L invertido)
+                        g.DrawLine(penEscuro, new Point(s * 0.12, s * 0.15), new Point(s * 0.12, s * 0.82));
+                        g.DrawLine(penEscuro, new Point(s * 0.12, s * 0.82), new Point(s * 0.90, s * 0.82));
+
+                        // Curva do profile
+                        var curva = new StreamGeometry();
+                        using (var ctx = curva.Open())
+                        {
+                            ctx.BeginFigure(new Point(s * 0.18, s * 0.68), false, false);
+                            ctx.LineTo(new Point(s * 0.38, s * 0.42), true, false);
+                            ctx.LineTo(new Point(s * 0.58, s * 0.52), true, false);
+                            ctx.LineTo(new Point(s * 0.82, s * 0.30), true, false);
+                        }
+                        curva.Freeze();
+                        g.DrawGeometry(null, penPrincipal, curva);
+
+                        // Tick marks (indicando labels sobre o profile)
+                        g.DrawLine(penPrincipal, new Point(s * 0.30, s * 0.50), new Point(s * 0.34, s * 0.60));
+                        g.DrawLine(penPrincipal, new Point(s * 0.50, s * 0.44), new Point(s * 0.54, s * 0.54));
+                        g.DrawLine(penPrincipal, new Point(s * 0.70, s * 0.38), new Point(s * 0.74, s * 0.48));
+
+                        // Etiqueta (caixa) com linha de chamada
+                        g.DrawLine(penCinza, new Point(s * 0.54, s * 0.54), new Point(s * 0.68, s * 0.18));
+                        g.DrawRectangle(corPrincipal, null, new Rect(s * 0.62, s * 0.08, s * 0.30, s * 0.14));
+                        g.DrawLine(penCinza, new Point(s * 0.66, s * 0.15), new Point(s * 0.88, s * 0.15));
+                    }
+                    break;
+
                 case "LS":
                     // Label Set: polilinha de alignment com etiquetas de estacao
                     {
@@ -1093,6 +1139,7 @@ namespace ZagoCivil3D.Ribbon
                 "CE" => Color.FromRgb(178, 34, 34),
                 "MD" => Color.FromRgb(255, 140, 0),
                 "LS" => Color.FromRgb(255, 140, 0),
+                "LV" => Color.FromRgb(0, 130, 130),
                 "LB" => Color.FromRgb(72, 61, 139),
                 "DL" => Color.FromRgb(169, 0, 0),
                 "TP" => Color.FromRgb(105, 105, 105),
